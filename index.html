@@ -278,6 +278,56 @@
             .so-header { align-items: flex-start; flex-direction: column; }
             .lo-item { margin-left: 0; }
         }
+    
+    /* =========================
+       INPUT SO LOCK (UI ONLY)
+       ========================= */
+    .so-lock-panel {
+        margin-bottom: 16px;
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        background: #f8fafc;
+        text-align: center;
+    }
+    .so-lock-panel strong {
+        display: block;
+        margin-bottom: 6px;
+    }
+    .so-lock-panel p {
+        margin: 0 0 12px;
+        color: #64748b;
+        font-size: 13px;
+    }
+    .so-input-locked {
+        display: none !important;
+    }
+    .btn-so-unlock, .btn-so-lock {
+        width: auto;
+        min-width: 180px;
+    }
+
+
+        /* =========================
+           LO SO-PRODUCT DROPDOWN
+           TAMBAHAN TAMPILAN SAJA
+        ========================= */
+        #lo_so_product_select {
+            font-size: 0.82rem;
+        }
+
+        #lo_so_product_select option {
+            font-size: 0.82rem;
+        }
+
+        #lo_so_product_select option.spbu-option-blue {
+            border-left: 6px solid #2563eb;
+        }
+
+        #lo_so_product_select option.spbu-option-green {
+            border-left: 6px solid #16a34a;
+        }
+
     </style>
 
   <!-- PWA additions -->
@@ -311,8 +361,17 @@
 
     <div class="grid">
         <!-- FORM INPUT SO -->
-        <div class="card">
-            <h2>Input Sales Order (SO)</h2>
+        <div class="so-lock-panel" id="soLockPanel">
+            <strong>🔒 Input SO Terkunci</strong>
+            <p>Masukkan PIN Editor untuk membuka menu Input SO.</p>
+            <button type="button" class="btn-editor btn-so-unlock" id="openSOInputBtn">🔐 Buka Input SO</button>
+        </div>
+
+        <div class="card so-input-locked" id="soInputCard">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                <h2 style="margin:0">Input Sales Order (SO)</h2>
+                <button type="button" class="btn-lock btn-so-lock" id="lockSOInputBtn">🔒 Kunci Input SO</button>
+            </div>
 
             <form id="formSO">
                 <div class="form-group">
@@ -646,11 +705,13 @@
                         // Shading pilihan berdasarkan SPBU
                         if (so.spbu === 'SPBU-74.906.07') {
                             option.style.backgroundColor = '#dbeafe';
+                            option.classList.add('spbu-option-blue');
                         } else if (so.spbu === 'SPBU-74.906.16') {
                             option.style.backgroundColor = '#dcfce7';
+                            option.classList.add('spbu-option-green');
                         }
 
-                        option.textContent = `${so.nomor_so}${so.spbu ? ' | ' + so.spbu : ''} | ${prod.product_name} | Sisa: ${sisa} KL`;
+                        option.textContent = `${so.nomor_so} | ${formatDate(so.tanggal_so)}${so.spbu ? ' | ' + so.spbu : ''} | ${prod.product_name} | Sisa: ${sisa} KL`;
                         loSelect.appendChild(option);
                     }
 
@@ -888,6 +949,9 @@
     let pinAction = null;
     let pendingEdit = null;
 
+    // INPUT SO LOCK: UI-only accidental-access protection.
+    let soInputUnlocked = false;
+
     const pinModal = document.getElementById('pinModal');
     const pinModalTitle = document.getElementById('pinModalTitle');
     const pinModalMessage = document.getElementById('pinModalMessage');
@@ -904,6 +968,19 @@
     const editCancelBtn = document.getElementById('editCancelBtn');
 
     function getStoredPinHash() { return localStorage.getItem('solo_editor_pin_hash'); }
+
+    function unlockSOInput() {
+        soInputUnlocked = true;
+        document.getElementById('soInputCard').classList.remove('so-input-locked');
+        document.getElementById('soLockPanel').style.display = 'none';
+        document.getElementById('so_number').focus();
+    }
+
+    function lockSOInput() {
+        soInputUnlocked = false;
+        document.getElementById('soInputCard').classList.add('so-input-locked');
+        document.getElementById('soLockPanel').style.display = '';
+    }
 
     async function sha256(text) {
         const data = new TextEncoder().encode(text);
@@ -974,6 +1051,18 @@
         return false;
     }
 
+    document.getElementById('openSOInputBtn').addEventListener('click', () => {
+        if (!getStoredPinHash()) {
+            openPinModal('create-so-unlock', 'Buat PIN Editor', 'Belum ada PIN Editor. Buat PIN baru untuk membuka Input SO.', 'Gunakan 4–12 angka.');
+        } else {
+            openPinModal('unlock-so', 'Buka Input SO', 'Masukkan PIN Editor untuk membuka menu Input SO.', 'Input SO akan terkunci kembali saat aplikasi dimuat ulang atau dikunci manual.');
+        }
+    });
+
+    document.getElementById('lockSOInputBtn').addEventListener('click', () => {
+        lockSOInput();
+    });
+
     document.getElementById('openEditorBtn').addEventListener('click', async () => {
         if (!getStoredPinHash()) {
             openPinModal('create', 'Buat PIN Editor', 'Belum ada PIN Editor. Buat PIN baru untuk melindungi perubahan data.', 'Gunakan 4–12 angka.');
@@ -1006,6 +1095,24 @@
 
         const hash = await sha256(pin);
         const existing = getStoredPinHash();
+
+        if (pinAction === 'create-so-unlock') {
+            localStorage.setItem('solo_editor_pin_hash', hash);
+            closePinModal();
+            alert('PIN Editor berhasil dibuat.');
+            unlockSOInput();
+            return;
+        }
+
+        if (pinAction === 'unlock-so') {
+            if (hash !== existing) {
+                pinModalHint.textContent = 'PIN salah.';
+                return;
+            }
+            closePinModal();
+            unlockSOInput();
+            return;
+        }
 
         if (pinAction === 'create') {
             localStorage.setItem('solo_editor_pin_hash', hash);
@@ -1193,6 +1300,9 @@
     // =========================
     // INITIAL FETCH & REALTIME
     // =========================
+    // Always start with Input SO locked on page load.
+    lockSOInput();
+
     fetchDashboard();
 
     sb.channel('schema-db-changes')
