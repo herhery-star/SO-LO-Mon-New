@@ -1,4 +1,5 @@
-const CACHE_NAME = 'so-lo-monitoring-v1';
+const CACHE_NAME = 'so-lo-monitoring-v2';
+
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,39 +10,145 @@ const APP_SHELL = [
   './icons/icon-512-maskable.png'
 ];
 
+
+/* ================================
+   INSTALL
+================================ */
+
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
-  );
+
   self.skipWaiting();
+
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(APP_SHELL))
+  );
+
 });
+
+
+/* ================================
+   ACTIVATE
+================================ */
 
 self.addEventListener('activate', event => {
+
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
-    )
+    caches.keys()
+      .then(keys => {
+
+        return Promise.all(
+          keys
+            .filter(key => key !== CACHE_NAME)
+            .map(key => caches.delete(key))
+        );
+
+      })
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
+
 });
 
+
+/* ================================
+   FETCH
+================================ */
+
 self.addEventListener('fetch', event => {
+
   if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
 
-      return fetch(event.request)
+  /*
+   * UNTUK HTML / NAVIGASI:
+   * Selalu coba ambil versi terbaru dari server.
+   * Jika offline, baru gunakan cache.
+   */
+
+  if (event.request.mode === 'navigate') {
+
+    event.respondWith(
+
+      fetch(event.request)
         .then(response => {
-          if (!response || response.status !== 200 || response.type === 'opaque') {
-            return response;
-          }
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+
+          const responseClone = response.clone();
+
+          caches.open(CACHE_NAME)
+            .then(cache => {
+
+              cache.put('./index.html', responseClone);
+
+            });
+
           return response;
+
         })
-        .catch(() => cached || caches.match('./index.html'));
-    })
+        .catch(() => {
+
+          return caches.match('./index.html');
+
+        })
+
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * UNTUK FILE LAIN:
+   * Cache dulu, jika belum ada ambil dari network.
+   */
+
+  event.respondWith(
+
+    caches.match(event.request)
+      .then(cached => {
+
+        if (cached) {
+
+          return cached;
+
+        }
+
+        return fetch(event.request)
+          .then(response => {
+
+            if (
+              !response ||
+              response.status !== 200 ||
+              response.type === 'opaque'
+            ) {
+
+              return response;
+
+            }
+
+            const responseClone = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then(cache => {
+
+                cache.put(
+                  event.request,
+                  responseClone
+                );
+
+              });
+
+            return response;
+
+          });
+
+      })
+      .catch(() => {
+
+        return caches.match('./index.html');
+
+      })
+
   );
+
 });
