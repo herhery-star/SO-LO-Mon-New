@@ -542,6 +542,10 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
 
+<style>
+/* RESUME BBM TERTINGGAL - tambahan */
+.resume-switch{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}.resume-switch button{min-height:42px;padding:10px 14px;cursor:pointer}.resume-page{display:none}.resume-page.active{display:block}.resume-card{border:1px solid #e2e8f0;border-radius:12px;margin:14px 0;overflow:hidden}.resume-head{padding:12px 14px;font-weight:700}.resume-head.blue{background:#eff6ff;border-left:6px solid #2563eb}.resume-head.green{background:#f0fdf4;border-left:6px solid #16a34a}.resume-table-wrap{overflow:auto}.resume-table{width:100%;border-collapse:collapse;min-width:650px}.resume-table th,.resume-table td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap}.resume-table th{background:#f8fafc;font-size:.8rem}.resume-total{font-weight:700;background:#fafafa}.resume-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}.resume-stat{border:1px solid #e2e8f0;border-radius:10px;padding:12px}.resume-stat b{display:block;font-size:1.25rem;margin-top:4px}
+</style>
 </head>
 
 <body>
@@ -682,6 +686,12 @@
         </div>
     </div>
 
+    <!-- TAMBAHAN RESUME: NAVIGASI -->
+    <div class="resume-switch">
+      <button type="button" id="resumeDashboardTab">Dashboard</button>
+      <button type="button" id="resumeBBMTab">Resume BBM Tertinggal</button>
+    </div>
+    <div id="resumeDashboardPage">
     <!-- DASHBOARD DISPLAY -->
     <h2>Dashboard Monitoring</h2>
 
@@ -692,6 +702,12 @@
 
     <h3>Bagian 2 — SO Selesai</h3>
     <div id="dashboardCompleted">Loading data...</div>
+    </div>
+    <!-- TAMBAHAN RESUME BBM TERTINGGAL -->
+    <div id="resumeBBMPage" class="resume-page">
+      <h2>Resume BBM Tertinggal</h2>
+      <div id="resumeBBMContent">Memuat data...</div>
+    </div>
 </div>
 
 
@@ -745,10 +761,17 @@
     const SUPABASE_URL = "https://gkeqbivbnywjvwykhobj.supabase.co";
     const SUPABASE_KEY = "sb_publishable_-yHkp6xzWRBnBFK7_YmzCg_wnMvw6Mo";
 
-    const sb = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
+    let sb = null;
+    try {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+            sb = window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_KEY
+            );
+        }
+    } catch (err) {
+        console.error("Gagal menginisialisasi Supabase SDK:", err);
+    }
 
     // =========================
     // DEFAULT DATES
@@ -883,6 +906,44 @@
     }
 
 
+
+    // ===== RESUME BBM TERTINGGAL: TAMBAHAN TERISOLASI =====
+    let resumeSOData = [];
+
+    function renderResumeBBM() {
+      const target=document.getElementById('resumeBBMContent');
+      if(!target) return;
+      try {
+        const rows=[];
+        (resumeSOData||[]).forEach(so=>{
+          (so.so_products||[]).forEach(product=>{
+            const active=(product.lo||[]).filter(lo=>!lo.deleted_at);
+            const terkirim=active.reduce((s,lo)=>s+Number(lo.quantity_lo||0),0);
+            const soQty=Number(product.quantity_so||0);
+            const sisa=Math.max(0,soQty-terkirim);
+            if(sisa>0) rows.push({tanggal:so.tanggal_so||'',nomor:so.nomor_so||'',spbu:so.spbu||'Tanpa SPBU',produk:product.product_name||'',soQty,terkirim,sisa});
+          });
+        });
+        if(!rows.length){target.innerHTML='<div class="resume-card"><div class="resume-head">Tidak ada BBM tertinggal</div></div>';return;}
+        const groups={}; rows.forEach(r=>(groups[r.spbu]||(groups[r.spbu]=[])).push(r));
+        const names=Object.keys(groups).sort();
+        let totalAll=0, content='<div class="resume-summary">';
+        names.forEach(n=>{const t=groups[n].reduce((s,r)=>s+r.sisa,0);totalAll+=t;content+=`<div class="resume-stat">${escapeHtml(n)}<b>${t} KL</b></div>`;});
+        content+=`<div class="resume-stat">TOTAL KESELURUHAN<b>${totalAll} KL</b></div></div>`;
+        names.forEach(n=>{
+          const shade=n==='SPBU-74.906.07'?'blue':n==='SPBU-74.906.16'?'green':'';
+          const data=groups[n].slice().sort((a,b)=>String(a.tanggal).localeCompare(String(b.tanggal)));
+          const t=data.reduce((s,r)=>s+r.sisa,0);
+          content+=`<div class="resume-card"><div class="resume-head ${shade}">${escapeHtml(n)}</div><div class="resume-table-wrap"><table class="resume-table"><thead><tr><th>Tanggal</th><th>Nomor SO</th><th>Produk</th><th>SO</th><th>Terkirim</th><th>Tertinggal</th></tr></thead><tbody>`;
+          data.forEach(r=>content+=`<tr><td>${formatDate(r.tanggal)}</td><td>${escapeHtml(r.nomor)}</td><td>${escapeHtml(r.produk)}</td><td>${r.soQty} KL</td><td>${r.terkirim} KL</td><td><b>${r.sisa} KL</b></td></tr>`);
+          content+=`<tr class="resume-total"><td colspan="5">TOTAL ${escapeHtml(n)}</td><td>${t} KL</td></tr></tbody></table></div></div>`;
+        });
+        target.innerHTML=content;
+      } catch(e){console.error('Resume error',e);target.innerHTML='<div class="resume-card"><div class="resume-head">Resume tidak dapat ditampilkan.</div></div>';}
+    }
+    function openResumeBBM(){document.getElementById('resumeDashboardPage').style.display='none';document.getElementById('resumeBBMPage').classList.add('active');renderResumeBBM();}
+    function closeResumeBBM(){document.getElementById('resumeBBMPage').classList.remove('active');document.getElementById('resumeDashboardPage').style.display='';}
+
     async function fetchDashboard() {
         const activeContainer = document.getElementById('dashboardActive');
         const completedContainer = document.getElementById('dashboardCompleted');
@@ -894,7 +955,7 @@
 
         try {
             if (!window.supabase || !sb || typeof sb.from !== 'function') {
-                throw new Error('Supabase client tidak berhasil diinisialisasi.');
+                throw new Error('Supabase client tidak berhasil diinisialisasi. Periksa koneksi internet atau library Supabase.');
             }
 
             const { data: soList, error } = await sb
@@ -924,6 +985,9 @@
             if (error) throw error;
 
             const safeList = soList || [];
+
+            // Tambahan Resume: snapshot data yang sama, tanpa query baru.
+            resumeSOData = safeList;
 
             activeContainer.innerHTML = '';
             completedContainer.innerHTML = '';
@@ -979,8 +1043,6 @@
                         option.dataset.spbu = so.spbu || '';
                         option.dataset.tanggal = formatDate(so.tanggal_so);
                         option.dataset.nomorSo = so.nomor_so || '';
-                        option.dataset.product = prod.product_name || '';
-                        option.dataset.remaining = String(sisa);
 
                         // Shading pilihan berdasarkan SPBU
                         if (so.spbu === 'SPBU-74.906.07') {
@@ -1047,8 +1109,8 @@
         } catch (error) {
             console.error('fetchDashboard error:', error);
             const message = error?.message || String(error);
-            activeContainer.innerHTML = `<div class="empty-state" style="color:#b91c1c;border-color:#fecaca;background:#fff1f2;"><strong>Gagal memuat dashboard.</strong><br>${escapeHtml(message)}</div>`;
-            completedContainer.innerHTML = '';
+            activeContainer.innerHTML = `<div class="empty-state" style="color:#b91c1c;border-color:#fecaca;background:#fff1f2;"><strong>Gagal memuat dashboard SO Aktif.</strong><br>${escapeHtml(message)}</div>`;
+            completedContainer.innerHTML = `<div class="empty-state" style="color:#b91c1c;border-color:#fecaca;background:#fff1f2;"><strong>Gagal memuat dashboard SO Selesai.</strong></div>`;
             loSelect.innerHTML = '<option value="">-- Pilih SO Produk --</option>';
             renderSOPicker();
         }
@@ -1075,6 +1137,8 @@
     // =========================
     document.getElementById('formSO').addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!sb) { alert("Koneksi Supabase belum siap."); return; }
 
         const nomor_so = document.getElementById('so_number').value.trim();
         const tanggal_so = document.getElementById('so_date').value;
@@ -1135,6 +1199,8 @@
     document.getElementById('formLO').addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        if (!sb) { alert("Koneksi Supabase belum siap."); return; }
+
         const p_nomor_lo = document.getElementById('lo_number').value.trim();
         const p_tanggal_lo = document.getElementById('lo_date').value;
         const p_so_product_id = document.getElementById('lo_so_product_select').value;
@@ -1185,6 +1251,7 @@
             'Hapus Loading Order?',
             `Yakin ingin melakukan soft delete untuk LO ${nomorLO}? Data tidak dihapus permanen, tetapi tidak lagi dihitung sebagai LO aktif.`,
             async () => {
+                if (!sb) return;
                 const { error } = await sb
                     .from('lo')
                     .update({ deleted_at: new Date().toISOString() })
@@ -1205,6 +1272,7 @@
             'Hapus Sales Order?',
             `Yakin ingin melakukan soft delete untuk SO ${nomorSO}? SO dan produknya tidak akan tampil lagi pada dashboard aktif maupun selesai.`,
             async () => {
+                if (!sb) return;
                 const { error } = await sb
                     .from('so')
                     .update({ deleted_at: new Date().toISOString() })
@@ -1480,6 +1548,7 @@
                 </select>
             `,
             async () => {
+                if (!sb) return;
                 const nomor_lo = document.getElementById('edit_lo_nomor').value.trim();
                 const tanggal_lo = document.getElementById('edit_lo_tanggal').value;
                 const quantity_lo = Number(document.getElementById('edit_lo_qty').value);
@@ -1544,6 +1613,7 @@
                 </select>
             `,
             async () => {
+                if (!sb) return;
                 const nomor_so = document.getElementById('edit_so_nomor').value.trim();
                 const tanggal_so = document.getElementById('edit_so_tanggal').value;
                 const spbu = document.getElementById('edit_so_spbu').value;
@@ -1588,21 +1658,41 @@
     // =========================
     // INITIAL FETCH & REALTIME
     // =========================
-    document.getElementById('openSOPickerBtn').addEventListener('click', openSOPicker);
-    document.getElementById('closeSOPickerBtn').addEventListener('click', closeSOPicker);
+
+    // Tombol buka halaman Pilih SO Produk.
+    // Optional chaining mencegah error jika elemen tidak ditemukan.
+    document.getElementById('openSOPickerBtn')
+        ?.addEventListener('click', openSOPicker);
+
+    // Event untuk elemen yang berada setelah script utama.
+    // Event dipasang setelah seluruh HTML selesai diparsing.
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('closeSOPickerBtn')
+            ?.addEventListener('click', closeSOPicker);
+
+        document.getElementById('resumeDashboardTab')
+            ?.addEventListener('click', closeResumeBBM);
+
+        document.getElementById('resumeBBMTab')
+            ?.addEventListener('click', openResumeBBM);
+    });
 
     // Always start with Input SO locked on page load.
     lockSOInput();
 
+    // Load dashboard.
     fetchDashboard();
 
-    sb.channel('schema-db-changes')
-        .on(
-            'postgres_changes',
-            { event: '*', schema: 'public' },
-            () => fetchDashboard()
-        )
-        .subscribe();
+    // Realtime update.
+    if (sb && typeof sb.channel === 'function') {
+        sb.channel('schema-db-changes')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public' },
+                () => fetchDashboard()
+            )
+            .subscribe();
+    }
 </script>
 
 <script>
