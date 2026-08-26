@@ -1012,7 +1012,7 @@
                                     (${formatDate(lo.tanggal_lo)})
                                     : ${lo.quantity_lo} KL
                                 </span>
-                                <button type="button" class="btn-edit editor-only" onclick="openEditLO('${lo.id}', '${escapeJs(lo.nomor_lo)}', ${lo.quantity_lo})">Edit</button>
+                                <button type="button" class="btn-edit editor-only" onclick="openEditLO('${lo.id}', '${escapeJs(lo.nomor_lo)}', ${lo.quantity_lo}, '${lo.tanggal_lo || ''}')">Edit</button>
                                 <button type="button" class="btn-del editor-only" onclick="confirmDeleteLO('${lo.id}', '${escapeJs(lo.nomor_lo)}')">Hapus</button>
                             </div>
                         `;
@@ -1464,13 +1464,15 @@
         if (typeof pendingEdit === 'function') await pendingEdit();
     });
 
-    async function openEditLO(loId, nomorLO, currentQty) {
+    async function openEditLO(loId, nomorLO, currentQty, currentDate = '') {
         openEditModal(
             'Edit Loading Order',
             `Ubah data LO ${nomorLO}. Nomor LO dapat diperbaiki tanpa membuat record baru.`,
             `
                 <label>Nomor LO</label>
                 <input id="edit_lo_nomor" value="${escapeHtml(nomorLO)}" maxlength="100">
+                <label style="margin-top:12px">Tanggal LO</label>
+                <input type="date" id="edit_lo_tanggal" value="${escapeHtml(currentDate || '')}">
                 <label style="margin-top:12px">Quantity LO</label>
                 <select id="edit_lo_qty">
                     <option value="4" ${Number(currentQty)===4?'selected':''}>4 KL</option>
@@ -1479,8 +1481,11 @@
             `,
             async () => {
                 const nomor_lo = document.getElementById('edit_lo_nomor').value.trim();
+                const tanggal_lo = document.getElementById('edit_lo_tanggal').value;
                 const quantity_lo = Number(document.getElementById('edit_lo_qty').value);
+
                 if (!nomor_lo) { alert('Nomor LO wajib diisi.'); return; }
+                if (!tanggal_lo) { alert('Tanggal LO wajib diisi.'); return; }
 
                 const { data: current, error: readErr } = await sb
                     .from('lo')
@@ -1513,7 +1518,7 @@
 
                 const { error } = await sb
                     .from('lo')
-                    .update({ nomor_lo, quantity_lo, updated_at: new Date().toISOString() })
+                    .update({ nomor_lo, tanggal_lo, quantity_lo, updated_at: new Date().toISOString() })
                     .eq('id', loId);
 
                 if (error) { alert('Gagal menyimpan perubahan LO: ' + error.message); return; }
@@ -1584,16 +1589,7 @@
     // INITIAL FETCH & REALTIME
     // =========================
     document.getElementById('openSOPickerBtn').addEventListener('click', openSOPicker);
-
-    // Tombol kembali berada pada Halaman 2 yang diletakkan setelah script utama.
-    // Gunakan DOMContentLoaded agar elemen sudah tersedia dan tidak menghentikan
-    // inisialisasi dashboard.
-    window.addEventListener('DOMContentLoaded', () => {
-        const closeSOPickerBtn = document.getElementById('closeSOPickerBtn');
-        if (closeSOPickerBtn) {
-            closeSOPickerBtn.addEventListener('click', closeSOPicker);
-        }
-    });
+    document.getElementById('closeSOPickerBtn').addEventListener('click', closeSOPicker);
 
     // Always start with Input SO locked on page load.
     lockSOInput();
