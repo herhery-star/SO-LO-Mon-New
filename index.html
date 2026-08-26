@@ -446,6 +446,85 @@
             font:inherit;
         }
 
+
+
+        /* =========================================
+           PENEGASAN AREA INPUT LO
+        ========================================= */
+        .lo-input-card {
+            border: 2px solid rgba(37, 99, 235, .48);
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            box-shadow:
+                0 4px 14px rgba(37, 99, 235, .10),
+                0 1px 3px rgba(15, 23, 42, .08);
+        }
+
+        .lo-input-card h2 {
+            border-bottom: 2px solid rgba(37, 99, 235, .24);
+            color: #1e3a5f;
+        }
+
+        .lo-input-card label {
+            color: #1e3a5f;
+        }
+
+        /* Shading biru → aqua → hijau lembut pada semua kotak input LO */
+        .lo-input-card input,
+        .lo-input-card select,
+        .lo-input-card .lo-so-picker-trigger {
+            border: 1.5px solid rgba(70, 125, 150, .38);
+            background:
+                linear-gradient(
+                    135deg,
+                    #e3f1ff 0%,
+                    #e8f7f4 52%,
+                    #def4e8 100%
+                );
+            border-radius: 10px;
+            color: #1f2d3d;
+        }
+
+        .lo-input-card input:hover,
+        .lo-input-card select:hover,
+        .lo-input-card .lo-so-picker-trigger:hover {
+            border-color: #5b9c9b;
+            background:
+                linear-gradient(
+                    135deg,
+                    #dcedff 0%,
+                    #e1f5f0 52%,
+                    #d5efdf 100%
+                );
+            opacity: 1;
+        }
+
+        .lo-input-card input:focus,
+        .lo-input-card select:focus {
+            outline: none;
+            border-color: #3d72c9;
+            background:
+                linear-gradient(
+                    135deg,
+                    #dceeff 0%,
+                    #e2f7f2 52%,
+                    #d9f1e3 100%
+                );
+            box-shadow:
+                0 0 0 3px rgba(61, 114, 201, .12),
+                0 4px 12px rgba(47, 139, 104, .08);
+        }
+
+        .lo-input-card .lo-so-picker-trigger {
+            color: #294b78;
+        }
+
+        .lo-input-card button[type="submit"] {
+            min-height: 52px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, .22);
+        }
+
         .so-picker-header {
             display:flex;
             align-items:center;
@@ -650,7 +729,7 @@
         </div>
 
         <!-- FORM INPUT LO -->
-        <div class="card">
+        <div class="card lo-input-card">
             <h2>Input Loading Order (LO)</h2>
 
             <form id="formLO">
