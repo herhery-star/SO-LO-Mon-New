@@ -625,6 +625,111 @@
 /* RESUME BBM TERTINGGAL - tambahan */
 .resume-switch{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}.resume-switch button{min-height:42px;padding:10px 14px;cursor:pointer}.resume-page{display:none}.resume-page.active{display:block}.resume-card{border:1px solid #e2e8f0;border-radius:12px;margin:14px 0;overflow:hidden}.resume-head{padding:12px 14px;font-weight:700}.resume-head.blue{background:#eff6ff;border-left:6px solid #2563eb}.resume-head.green{background:#f0fdf4;border-left:6px solid #16a34a}.resume-table-wrap{overflow:auto}.resume-table{width:100%;border-collapse:collapse;min-width:650px}.resume-table th,.resume-table td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap}.resume-table th{background:#f8fafc;font-size:.8rem}.resume-total{font-weight:700;background:#fafafa}.resume-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}.resume-stat{border:1px solid #e2e8f0;border-radius:10px;padding:12px}.resume-stat b{display:block;font-size:1.25rem;margin-top:4px}
 </style>
+
+<style id="navigation-collapse-addon">
+/* =========================================
+   ADD-ON: FLOATING NAVIGATION
+   + COLLAPSE BAGIAN 2 — SO SELESAI
+   Kode lama tidak diubah
+========================================= */
+
+/* Navigasi berada tepat di tengah sisi kanan layar */
+.floating-nav-addon {
+    position: fixed;
+    right: 8px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    z-index: 9998;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Tombol bulat dengan ikon segitiga */
+.floating-nav-addon button {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    padding: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #2f64bd;
+    color: transparent;
+    border: 0;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, .20);
+    line-height: 1;
+    position: relative;
+}
+
+.floating-nav-addon button::before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+}
+
+/* Segitiga menghadap ke atas */
+#floatingTopAddon::before {
+    border-bottom: 10px solid #ffffff;
+}
+
+/* Segitiga menghadap ke bawah */
+#floatingBottomAddon::before {
+    border-top: 10px solid #ffffff;
+}
+
+.floating-nav-addon button:hover {
+    background: #2563eb;
+    opacity: 1;
+    transform: scale(1.06);
+}
+
+.completed-title-row-addon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.completed-title-row-addon h3 {
+    margin-top: 28px;
+    margin-bottom: 0;
+}
+
+.completed-toggle-addon {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    display: grid !important;
+    place-items: center !important;
+    background: #475569 !important;
+    font-size: 22px !important;
+    line-height: 1;
+}
+
+#dashboardCompleted.completed-collapsed-addon {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .floating-nav-addon {
+        right: 6px;
+    }
+
+    .floating-nav-addon button {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+    }
+}
+</style>
+
 </head>
 
 <body>
@@ -779,8 +884,16 @@
 
     <div class="divider"><span>SO SELESAI</span></div>
 
-    <h3>Bagian 2 — SO Selesai</h3>
-    <div id="dashboardCompleted">Loading data...</div>
+    <div class="completed-title-row-addon">
+        <h3>Bagian 2 — SO Selesai</h3>
+        <button type="button"
+                id="completedToggleAddon"
+                class="completed-toggle-addon"
+                aria-controls="dashboardCompleted"
+                aria-expanded="false"
+                title="Tampilkan rincian SO Selesai">+</button>
+    </div>
+    <div id="dashboardCompleted" class="completed-collapsed-addon">Loading data...</div>
     </div>
     <!-- TAMBAHAN RESUME BBM TERTINGGAL -->
     <div id="resumeBBMPage" class="resume-page">
@@ -1794,6 +1907,70 @@ if ('serviceWorker' in navigator) {
             <div id="soPickerList" class="so-picker-list"></div>
         </div>
     </section>
+
+
+<!-- ADD-ON: FLOATING NAVIGATION -->
+<div class="floating-nav-addon" aria-label="Navigasi cepat">
+    <button type="button" id="floatingTopAddon"
+            aria-label="Ke bagian atas" title="Ke bagian atas"></button>
+    <button type="button" id="floatingBottomAddon"
+            aria-label="Ke bagian bawah" title="Ke bagian bawah"></button>
+</div>
+
+<script id="navigation-collapse-addon-script">
+(function () {
+    'use strict';
+
+    function initNavigationCollapseAddon() {
+        const topButton = document.getElementById('floatingTopAddon');
+        const bottomButton = document.getElementById('floatingBottomAddon');
+        const toggleButton = document.getElementById('completedToggleAddon');
+        const completedContainer = document.getElementById('dashboardCompleted');
+
+        if (topButton) {
+            topButton.addEventListener('click', function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        if (bottomButton) {
+            bottomButton.addEventListener('click', function () {
+                window.scrollTo({
+                    top: document.documentElement.scrollHeight,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        if (toggleButton && completedContainer) {
+            toggleButton.addEventListener('click', function () {
+                const isCollapsed = completedContainer.classList.toggle(
+                    'completed-collapsed-addon'
+                );
+
+                toggleButton.textContent = isCollapsed ? '+' : '−';
+                toggleButton.setAttribute(
+                    'aria-expanded',
+                    isCollapsed ? 'false' : 'true'
+                );
+                toggleButton.title = isCollapsed
+                    ? 'Tampilkan rincian SO Selesai'
+                    : 'Sembunyikan rincian SO Selesai';
+            });
+        }
+    }
+
+    // Script berada setelah HTML utama, tetapi tetap aman jika urutan berubah.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initNavigationCollapseAddon, { once: true });
+    } else {
+        initNavigationCollapseAddon();
+    }
+})();
+</script>
 
 </body>
 </html>
