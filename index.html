@@ -533,13 +533,21 @@
         }
 
         .so-picker-back {
+            /* Override tombol global width:100% agar tidak muncul kotak kosong panjang */
+            width:auto !important;
             min-width:42px;
+            width:42px !important;
+            height:42px;
             min-height:42px;
+            flex:0 0 42px;
+            padding:0 !important;
             border:1px solid #cbd5e1;
             border-radius:10px;
             background:#fff;
+            color:#334155 !important;
             cursor:pointer;
             font-size:20px;
+            line-height:1;
         }
 
         .so-picker-title { margin:0; font-size:1.05rem; }
@@ -1737,14 +1745,109 @@
     });
 
     async function openEditLO(loId, nomorLO, currentQty, currentDate = '') {
+        if (!ensureEditor()) return;
+        if (!sb) return;
+
+        // Ambil LO saat ini dan daftar SO aktif agar Nomor SO dapat dikoreksi
+        // tanpa membuat record LO baru.
+        const [{ data: currentLO, error: currentErr }, { data: soList, error: soErr }] = await Promise.all([
+            sb
+                .from('lo')
+                .select('id, so_product_id')
+                .eq('id', loId)
+                .single(),
+            sb
+                .from('so')
+                .select(`
+                    id,
+                    nomor_so,
+                    tanggal_so,
+                    spbu,
+                    completed_at,
+                    deleted_at,
+                    so_products (
+                        id,
+                        product_name,
+                        quantity_so,
+                        lo (
+                            id,
+                            quantity_lo,
+                            deleted_at
+                        )
+                    )
+                `)
+                .is('deleted_at', null)
+        ]);
+
+        if (currentErr) {
+            alert('Gagal membaca data LO: ' + currentErr.message);
+            return;
+        }
+
+        if (soErr) {
+            alert('Gagal memuat daftar SO: ' + soErr.message);
+            return;
+        }
+
+        const currentProductId = currentLO.so_product_id;
+        const soOptions = [];
+
+        (soList || [])
+            .sort((a, b) => new Date(a.tanggal_so) - new Date(b.tanggal_so))
+            .forEach(so => {
+                (so.so_products || []).forEach(prod => {
+                    const usedByOthers = (prod.lo || [])
+                        .filter(lo => !lo.deleted_at && lo.id !== loId)
+                        .reduce((sum, lo) => sum + Number(lo.quantity_lo || 0), 0);
+
+                    const remainingAfterOthers = Number(prod.quantity_so || 0) - usedByOthers;
+                    const isCurrent = prod.id === currentProductId;
+
+                    // SO selesai tidak ditawarkan sebagai tujuan baru,
+                    // tetapi relasi LO saat ini tetap ditampilkan.
+                    if (!isCurrent && so.completed_at) return;
+
+                    if (isCurrent || remainingAfterOthers > 0) {
+                        soOptions.push({
+                            id: prod.id,
+                            nomorSO: so.nomor_so || '',
+                            tanggalSO: so.tanggal_so || '',
+                            spbu: so.spbu || '',
+                            productName: prod.product_name || '',
+                            remaining: remainingAfterOthers,
+                            isCurrent
+                        });
+                    }
+                });
+            });
+
+        const optionsHtml = soOptions.length
+            ? soOptions.map(item => `
+                <option value="${escapeHtml(item.id)}"
+                    ${item.isCurrent ? 'selected' : ''}
+                    data-product="${escapeHtml(item.productName)}"
+                    data-remaining="${Number(item.remaining)}">
+                    ${escapeHtml(item.nomorSO)} | ${escapeHtml(formatDate(item.tanggalSO))} | ${escapeHtml(item.spbu)} | ${escapeHtml(item.productName)} | Sisa tersedia: ${Number(item.remaining)} KL
+                </option>
+            `).join('')
+            : `<option value="">Tidak ada SO yang tersedia</option>`;
+
         openEditModal(
             'Edit Loading Order',
-            `Ubah data LO ${nomorLO}. Nomor LO dapat diperbaiki tanpa membuat record baru.`,
+            `Ubah data LO ${nomorLO}. Nomor LO, Nomor SO tujuan, tanggal, dan quantity dapat diperbaiki tanpa membuat record LO baru.`,
             `
                 <label>Nomor LO</label>
                 <input id="edit_lo_nomor" value="${escapeHtml(nomorLO)}" maxlength="100">
+
+                <label style="margin-top:12px">Nomor SO / Produk Tujuan</label>
+                <select id="edit_lo_so_product">
+                    ${optionsHtml}
+                </select>
+                <small>Gunakan pilihan ini jika LO tercatat pada Nomor SO yang salah. Produk terkait ditampilkan agar perpindahan LO tetap konsisten.</small>
+
                 <label style="margin-top:12px">Tanggal LO</label>
                 <input type="date" id="edit_lo_tanggal" value="${escapeHtml(currentDate || '')}">
+
                 <label style="margin-top:12px">Quantity LO</label>
                 <select id="edit_lo_qty">
                     <option value="4" ${Number(currentQty)===4?'selected':''}>4 KL</option>
@@ -1753,48 +1856,79 @@
             `,
             async () => {
                 if (!sb) return;
+
                 const nomor_lo = document.getElementById('edit_lo_nomor').value.trim();
                 const tanggal_lo = document.getElementById('edit_lo_tanggal').value;
                 const quantity_lo = Number(document.getElementById('edit_lo_qty').value);
+                const targetProductId = document.getElementById('edit_lo_so_product').value;
 
                 if (!nomor_lo) { alert('Nomor LO wajib diisi.'); return; }
                 if (!tanggal_lo) { alert('Tanggal LO wajib diisi.'); return; }
+                if (!targetProductId) { alert('Pilih Nomor SO tujuan terlebih dahulu.'); return; }
 
-                const { data: current, error: readErr } = await sb
-                    .from('lo')
-                    .select('id, so_product_id, quantity_lo, so_products(quantity_so, product_name)')
-                    .eq('id', loId)
+                const selectedTarget = document.getElementById('edit_lo_so_product').selectedOptions[0];
+                const targetProductName = selectedTarget?.dataset?.product || '';
+
+                if (quantity_lo === 4 && targetProductName !== 'Dexlite') {
+                    alert('Quantity 4 KL hanya diperbolehkan untuk Dexlite.');
+                    return;
+                }
+
+                // Validasi ulang langsung ke database agar tetap aman jika data berubah
+                // setelah modal dibuka.
+                const { data: targetProduct, error: targetErr } = await sb
+                    .from('so_products')
+                    .select('id, quantity_so, product_name, so(id, completed_at, deleted_at)')
+                    .eq('id', targetProductId)
                     .single();
 
-                if (readErr) { alert('Gagal membaca LO: ' + readErr.message); return; }
+                if (targetErr || !targetProduct) {
+                    alert('SO tujuan tidak dapat ditemukan atau sudah tidak tersedia.');
+                    return;
+                }
 
-                const product = Array.isArray(current.so_products) ? current.so_products[0] : current.so_products;
-                if (quantity_lo === 4 && product.product_name !== 'Dexlite') {
-                    alert('Quantity 4 KL hanya diperbolehkan untuk Dexlite.');
+                const targetSO = Array.isArray(targetProduct.so) ? targetProduct.so[0] : targetProduct.so;
+                if (targetProductId !== currentProductId && (targetSO?.deleted_at || targetSO?.completed_at)) {
+                    alert('SO tujuan sudah tidak aktif dan tidak dapat dipilih.');
                     return;
                 }
 
                 const { data: siblings, error: sumErr } = await sb
                     .from('lo')
                     .select('quantity_lo')
-                    .eq('so_product_id', current.so_product_id)
+                    .eq('so_product_id', targetProductId)
                     .is('deleted_at', null)
                     .neq('id', loId);
 
-                if (sumErr) { alert('Gagal memvalidasi total LO: ' + sumErr.message); return; }
+                if (sumErr) {
+                    alert('Gagal memvalidasi total LO: ' + sumErr.message);
+                    return;
+                }
 
-                const otherTotal = (siblings || []).reduce((s, x) => s + Number(x.quantity_lo || 0), 0);
-                if (otherTotal + quantity_lo > Number(product.quantity_so)) {
-                    alert(`Perubahan ditolak: total LO akan menjadi ${otherTotal + quantity_lo} KL, melebihi SO ${product.quantity_so} KL.`);
+                const otherTotal = (siblings || [])
+                    .reduce((sum, row) => sum + Number(row.quantity_lo || 0), 0);
+
+                if (otherTotal + quantity_lo > Number(targetProduct.quantity_so)) {
+                    alert(`Perubahan ditolak: total LO pada SO tujuan akan menjadi ${otherTotal + quantity_lo} KL, melebihi kuantitas SO ${targetProduct.quantity_so} KL.`);
                     return;
                 }
 
                 const { error } = await sb
                     .from('lo')
-                    .update({ nomor_lo, tanggal_lo, quantity_lo, updated_at: new Date().toISOString() })
+                    .update({
+                        nomor_lo,
+                        tanggal_lo,
+                        quantity_lo,
+                        so_product_id: targetProductId,
+                        updated_at: new Date().toISOString()
+                    })
                     .eq('id', loId);
 
-                if (error) { alert('Gagal menyimpan perubahan LO: ' + error.message); return; }
+                if (error) {
+                    alert('Gagal menyimpan perubahan LO: ' + error.message);
+                    return;
+                }
+
                 closeEditModal();
                 await fetchDashboard();
             }
