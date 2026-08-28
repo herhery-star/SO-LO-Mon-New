@@ -1126,9 +1126,21 @@
           const shade=n==='SPBU-74.906.07'?'blue':n==='SPBU-74.906.16'?'green':'';
           const data=groups[n].slice().sort((a,b)=>String(a.tanggal).localeCompare(String(b.tanggal)));
           const t=data.reduce((s,r)=>s+r.sisa,0);
+
+          // Rincian total BBM tertinggal per produk untuk setiap SPBU
+          const productTotals={};
+          data.forEach(r=>{
+            const nama=r.produk || 'Produk Lain';
+            productTotals[nama]=(productTotals[nama]||0)+r.sisa;
+          });
+          const productDetails=Object.keys(productTotals)
+            .sort()
+            .map(nama=>`${escapeHtml(nama)}: <b>${productTotals[nama]} KL</b>`)
+            .join(' &nbsp; | &nbsp; ');
+
           content+=`<div class="resume-card"><div class="resume-head ${shade}">${escapeHtml(n)}</div><div class="resume-table-wrap"><table class="resume-table"><thead><tr><th>Tanggal</th><th>Nomor SO</th><th>Produk</th><th>SO</th><th>Terkirim</th><th>Tertinggal</th></tr></thead><tbody>`;
           data.forEach(r=>content+=`<tr><td>${formatDate(r.tanggal)}</td><td>${escapeHtml(r.nomor)}</td><td>${escapeHtml(r.produk)}</td><td>${r.soQty} KL</td><td>${r.terkirim} KL</td><td><b>${r.sisa} KL</b></td></tr>`);
-          content+=`<tr class="resume-total"><td colspan="5">TOTAL ${escapeHtml(n)}</td><td>${t} KL</td></tr></tbody></table></div></div>`;
+          content+=`<tr class="resume-total"><td colspan="5"><div>TOTAL ${escapeHtml(n)}</div><div style="margin-top:5px;font-size:.82rem;font-weight:500;color:#475569">${productDetails}</div></td><td><b>${t} KL</b></td></tr></tbody></table></div></div>`;
         });
         target.innerHTML=content;
       } catch(e){console.error('Resume error',e);target.innerHTML='<div class="resume-card"><div class="resume-head">Resume tidak dapat ditampilkan.</div></div>';}
