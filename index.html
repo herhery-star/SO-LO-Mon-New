@@ -1107,54 +1107,182 @@
 
 
 
-    // ===== RESUME BBM TERTINGGAL: TAMBAHAN TERISOLASI =====
+    // ===== RESUME BBM TERTINGGAL: RINCIAN BERDASARKAN TANGGAL =====
     let resumeSOData = [];
 
     function renderResumeBBM() {
-      const target=document.getElementById('resumeBBMContent');
-      if(!target) return;
+      const target = document.getElementById('resumeBBMContent');
+      if (!target) return;
+
       try {
-        const rows=[];
-        (resumeSOData||[]).forEach(so=>{
-          (so.so_products||[]).forEach(product=>{
-            const active=(product.lo||[]).filter(lo=>!lo.deleted_at);
-            const terkirim=active.reduce((s,lo)=>s+Number(lo.quantity_lo||0),0);
-            const soQty=Number(product.quantity_so||0);
-            const sisa=Math.max(0,soQty-terkirim);
-            if(sisa>0) rows.push({tanggal:so.tanggal_so||'',nomor:so.nomor_so||'',spbu:so.spbu||'Tanpa SPBU',produk:product.product_name||'',soQty,terkirim,sisa});
+        const rows = [];
+
+        // Resume menggunakan sisa/BBM yang BELUM TERKIRIM.
+        (resumeSOData || []).forEach(so => {
+          (so.so_products || []).forEach(product => {
+            const active = (product.lo || []).filter(lo => !lo.deleted_at);
+            const terkirim = active.reduce((s, lo) => s + Number(lo.quantity_lo || 0), 0);
+            const soQty = Number(product.quantity_so || 0);
+            const sisa = Math.max(0, soQty - terkirim);
+
+            if (sisa > 0) {
+              rows.push({
+                tanggal: so.tanggal_so || '',
+                nomor: so.nomor_so || '',
+                spbu: so.spbu || 'Tanpa SPBU',
+                produk: product.product_name || '',
+                soQty,
+                terkirim,
+                sisa
+              });
+            }
           });
         });
-        if(!rows.length){target.innerHTML='<div class="resume-card"><div class="resume-head">Tidak ada BBM tertinggal</div></div>';return;}
-        const groups={}; rows.forEach(r=>(groups[r.spbu]||(groups[r.spbu]=[])).push(r));
-        const names=Object.keys(groups).sort();
-        let totalAll=0, content='<div class="resume-summary">';
-        names.forEach(n=>{const t=groups[n].reduce((s,r)=>s+r.sisa,0);totalAll+=t;content+=`<div class="resume-stat">${escapeHtml(n)}<b>${t} KL</b></div>`;});
-        content+=`<div class="resume-stat">TOTAL KESELURUHAN<b>${totalAll} KL</b></div></div>`;
-        names.forEach(n=>{
-          const shade=n==='SPBU-74.906.07'?'blue':n==='SPBU-74.906.16'?'green':'';
-          const data=groups[n].slice().sort((a,b)=>String(a.tanggal).localeCompare(String(b.tanggal)));
-          const t=data.reduce((s,r)=>s+r.sisa,0);
 
-          // Rincian total BBM tertinggal per produk untuk setiap SPBU
-          const productTotals={};
-          data.forEach(r=>{
-            const nama=r.produk || 'Produk Lain';
-            productTotals[nama]=(productTotals[nama]||0)+r.sisa;
+        if (!rows.length) {
+          target.innerHTML = '<div class="resume-card"><div class="resume-head">Tidak ada BBM tertinggal</div></div>';
+          return;
+        }
+
+        // Gunakan tanggal lokal browser, bukan UTC, agar pembagian hari
+        // tetap sesuai tanggal operasional aplikasi.
+        const now = new Date();
+        const todayKey = [
+          now.getFullYear(),
+          String(now.getMonth() + 1).padStart(2, '0'),
+          String(now.getDate()).padStart(2, '0')
+        ].join('-');
+
+        const twoDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2);
+        const twoDaysAgoKey = [
+          twoDaysAgo.getFullYear(),
+          String(twoDaysAgo.getMonth() + 1).padStart(2, '0'),
+          String(twoDaysAgo.getDate()).padStart(2, '0')
+        ].join('-');
+
+        const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        const yesterdayKey = [
+          yesterday.getFullYear(),
+          String(yesterday.getMonth() + 1).padStart(2, '0'),
+          String(yesterday.getDate()).padStart(2, '0')
+        ].join('-');
+
+        const groups = {};
+        rows.forEach(r => {
+          (groups[r.spbu] || (groups[r.spbu] = [])).push(r);
+        });
+
+        const names = Object.keys(groups).sort();
+        let totalAll = 0;
+        let content = '<div class="resume-summary">';
+
+        names.forEach(n => {
+          const t = groups[n].reduce((s, r) => s + r.sisa, 0);
+          totalAll += t;
+          content += `<div class="resume-stat">${escapeHtml(n)}<b>${t} KL</b></div>`;
+        });
+
+        content += `<div class="resume-stat">TOTAL KESELURUHAN<b>${totalAll} KL</b></div></div>`;
+
+        names.forEach(n => {
+          const shade = n === 'SPBU-74.906.07' ? 'blue' : n === 'SPBU-74.906.16' ? 'green' : '';
+          const data = groups[n].slice().sort((a, b) => String(a.tanggal).localeCompare(String(b.tanggal)));
+          const t = data.reduce((s, r) => s + r.sisa, 0);
+
+          // Kelompok tanggal: hari ini, kemarin, dan tertinggal sampai 2 hari lalu.
+          const pembelianHariIni = data.filter(r => String(r.tanggal).slice(0, 10) === todayKey);
+          const pembelianKemarin = data.filter(r => String(r.tanggal).slice(0, 10) === yesterdayKey);
+          const tertinggalLama = data.filter(r => String(r.tanggal).slice(0, 10) <= twoDaysAgoKey);
+
+          function productSummary(list) {
+            const totals = {};
+            list.forEach(r => {
+              const nama = r.produk || 'Produk Lain';
+              totals[nama] = (totals[nama] || 0) + r.sisa;
+            });
+
+            return Object.keys(totals)
+              .sort()
+              .map(nama => `${escapeHtml(nama)}: <b>${totals[nama]} KL</b>`)
+              .join(' &nbsp; | &nbsp; ') || '<span style="color:#94a3b8">Tidak ada</span>';
+          }
+
+          const totalProduk = {};
+          data.forEach(r => {
+            const nama = r.produk || 'Produk Lain';
+            totalProduk[nama] = (totalProduk[nama] || 0) + r.sisa;
           });
-          const productDetails=Object.keys(productTotals)
+
+          const productDetails = Object.keys(totalProduk)
             .sort()
-            .map(nama=>`${escapeHtml(nama)}: <b>${productTotals[nama]} KL</b>`)
+            .map(nama => `${escapeHtml(nama)}: <b>${totalProduk[nama]} KL</b>`)
             .join(' &nbsp; | &nbsp; ');
 
-          content+=`<div class="resume-card"><div class="resume-head ${shade}">${escapeHtml(n)}</div><div class="resume-table-wrap"><table class="resume-table"><thead><tr><th>Tanggal</th><th>Nomor SO</th><th>Produk</th><th>SO</th><th>Terkirim</th><th>Tertinggal</th></tr></thead><tbody>`;
-          data.forEach(r=>content+=`<tr><td>${formatDate(r.tanggal)}</td><td>${escapeHtml(r.nomor)}</td><td>${escapeHtml(r.produk)}</td><td>${r.soQty} KL</td><td>${r.terkirim} KL</td><td><b>${r.sisa} KL</b></td></tr>`);
-          content+=`<tr class="resume-total"><td colspan="5"><div>TOTAL ${escapeHtml(n)}</div><div style="margin-top:5px;font-size:.82rem;font-weight:500;color:#475569">${productDetails}</div></td><td><b>${t} KL</b></td></tr></tbody></table></div></div>`;
+          const oldDates = tertinggalLama
+            .map(r => String(r.tanggal).slice(0, 10))
+            .filter(Boolean)
+            .sort();
+          const tanggalTertinggal = oldDates.length
+            ? `${formatDate(oldDates[0])} s/d ${formatDate(twoDaysAgoKey)}`
+            : 'tidak ada';
+
+          content += `<div class="resume-card">
+            <div class="resume-head ${shade}">${escapeHtml(n)}</div>
+            <div class="resume-table-wrap">
+              <table class="resume-table">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Nomor SO</th>
+                    <th>Produk</th>
+                    <th>SO</th>
+                    <th>Terkirim</th>
+                    <th>Belum Terkirim</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+
+          data.forEach(r => {
+            content += `<tr>
+              <td>${formatDate(r.tanggal)}</td>
+              <td>${escapeHtml(r.nomor)}</td>
+              <td>${escapeHtml(r.produk)}</td>
+              <td>${r.soQty} KL</td>
+              <td>${r.terkirim} KL</td>
+              <td><b>${r.sisa} KL</b></td>
+            </tr>`;
+          });
+
+          content += `<tr class="resume-total">
+            <td colspan="6">
+              <div style="font-weight:700;font-size:.95rem;margin-bottom:10px;">TOTAL ${escapeHtml(n)}</div>
+              <div style="display:grid;gap:6px;font-size:.82rem;font-weight:500;color:#475569;line-height:1.55;">
+                <div><b>Pembelian Hari Ini (${formatDate(todayKey)}):</b> ${productSummary(pembelianHariIni)}</div>
+                <div><b>Pembelian Kemarin (${formatDate(yesterdayKey)}):</b> ${productSummary(pembelianKemarin)}</div>
+                <div><b>Tertinggal (${tanggalTertinggal}):</b> ${productSummary(tertinggalLama)}</div>
+                <div><b>Tot Stok Belum Datang:</b> ${productDetails}</div>
+              </div>
+            </td>
+          </tr></tbody></table></div></div>`;
         });
-        target.innerHTML=content;
-      } catch(e){console.error('Resume error',e);target.innerHTML='<div class="resume-card"><div class="resume-head">Resume tidak dapat ditampilkan.</div></div>';}
+
+        target.innerHTML = content;
+      } catch (e) {
+        console.error('Resume error', e);
+        target.innerHTML = '<div class="resume-card"><div class="resume-head">Resume tidak dapat ditampilkan.</div></div>';
+      }
     }
-    function openResumeBBM(){document.getElementById('resumeDashboardPage').style.display='none';document.getElementById('resumeBBMPage').classList.add('active');renderResumeBBM();}
-    function closeResumeBBM(){document.getElementById('resumeBBMPage').classList.remove('active');document.getElementById('resumeDashboardPage').style.display='';}
+
+    function openResumeBBM() {
+      document.getElementById('resumeDashboardPage').style.display = 'none';
+      document.getElementById('resumeBBMPage').classList.add('active');
+      renderResumeBBM();
+    }
+
+    function closeResumeBBM() {
+      document.getElementById('resumeBBMPage').classList.remove('active');
+      document.getElementById('resumeDashboardPage').style.display = '';
+    }
 
     async function fetchDashboard() {
         const activeContainer = document.getElementById('dashboardActive');
