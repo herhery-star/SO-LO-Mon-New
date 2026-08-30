@@ -103,6 +103,107 @@
       border-left: 6px solid #3b82f6;
     }
 
+    /* FILTER SPBU DASHBOARD */
+    .dashboard-spbu-filter-wrap {
+        margin: 0 0 20px;
+     font-size: 2rem; }
+
+    .dashboard-spbu-filter {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 0 0 8px;
+    }
+
+    .dashboard-spbu-filter button {
+        width: auto;
+        min-width: 205px;
+        min-height: 48px;
+        padding: 10px 18px;
+        border-radius: 7px;
+        font-size: .98rem;
+        font-weight: 800;
+        letter-spacing: .1px;
+        border: 3px solid currentColor;
+        transition: opacity .15s ease, transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+
+    .dashboard-spbu-filter .filter-spbu-blue {
+        background: #1e40af;
+        color: #fff;
+        border-color: #172554;
+        box-shadow: 0 2px 0 #0f172a, 0 4px 9px rgba(30,64,175,.30);
+    }
+
+    .dashboard-spbu-filter .filter-spbu-green {
+        background: #15803d;
+        color: #fff;
+        border-color: #14532d;
+        box-shadow: 0 2px 0 #052e16, 0 4px 9px rgba(21,128,61,.30);
+    }
+
+    .dashboard-spbu-filter button.is-active {
+        opacity: 1;
+        transform: translateY(-1px);
+    }
+
+    .dashboard-spbu-filter .filter-spbu-blue.is-active {
+        border-color: #020617;
+        box-shadow: 0 0 0 2px #60a5fa, 0 3px 0 #0f172a, 0 5px 12px rgba(30,64,175,.38);
+    }
+
+    .dashboard-spbu-filter .filter-spbu-green.is-active {
+        border-color: #052e16;
+        box-shadow: 0 0 0 2px #4ade80, 0 3px 0 #052e16, 0 5px 12px rgba(21,128,61,.38);
+    }
+
+    .dashboard-spbu-filter button:not(.is-active) {
+        opacity: .82;
+    }
+
+    .dashboard-spbu-filter button:hover { opacity: 1; }
+
+    .dashboard-spbu-filter button:focus-visible {
+        outline: 3px solid #0f172a;
+        outline-offset: 2px;
+    }
+
+    .dashboard-filter-help {
+        font-size: .84rem;
+        color: #475569;
+        line-height: 1.5;
+        padding: 7px 2px 0;
+    }
+
+    .dashboard-filter-help strong {
+        color: #0f172a;
+    }
+
+    .dashboard-filter-empty {
+        padding: 18px;
+        color: #64748b;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    .so-card.dashboard-spbu-hidden {
+        display: none !important;
+    }
+
+    @media (max-width: 640px) {
+        .dashboard-spbu-filter {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .dashboard-spbu-filter button {
+            width: 100%;
+            min-width: 0;
+            padding: 10px 8px;
+            font-size: .88rem;
+        }
+    }
+
     .so-card { margin-bottom: 16px; padding: 16px; }
 
         .so-header {
@@ -740,7 +841,81 @@
             .so-picker-sisa { grid-column:1 / -1; }
         }
 
-    </style>
+    
+/* FINAL SPBU FILTER — mobile-friendly, side-by-side */
+.spbu-filter-wrap{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:12px !important;
+    width:100% !important;
+    margin:14px 0 10px !important;
+}
+.spbu-filter-btn{
+    width:100% !important;
+    min-width:0 !important;
+    min-height:62px !important;
+    padding:10px 8px !important;
+    border-radius:9px !important;
+    font-size:clamp(1.15rem,5vw,1.55rem) !important;
+    line-height:1.15 !important;
+    font-weight:800 !important;
+    letter-spacing:-.01em !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:clip !important;
+    text-align:center !important;
+    color:#fff !important;
+    border:3px solid !important;
+    box-shadow:0 3px 0 rgba(15,23,42,.55),0 5px 10px rgba(15,23,42,.18) !important;
+}
+.spbu-filter-btn.spbu-blue{
+    background:#1e40af !important;
+    border-color:#172554 !important;
+    color:#fff !important;
+}
+.spbu-filter-btn.spbu-green{
+    background:#15803d !important;
+    border-color:#14532d !important;
+    color:#fff !important;
+}
+.spbu-filter-btn.spbu-blue.active,
+.spbu-filter-btn.spbu-blue:active{
+    background:#1d4ed8 !important;
+    border-color:#020617 !important;
+    box-shadow:0 0 0 2px #60a5fa,0 3px 0 #0f172a,0 5px 12px rgba(30,64,175,.38) !important;
+}
+.spbu-filter-btn.spbu-green.active,
+.spbu-filter-btn.spbu-green:active{
+    background:#16a34a !important;
+    border-color:#052e16 !important;
+    box-shadow:0 0 0 2px #4ade80,0 3px 0 #052e16,0 5px 12px rgba(21,128,61,.38) !important;
+}
+.spbu-filter-btn:focus-visible{
+    outline:3px solid #f8fafc !important;
+    outline-offset:2px !important;
+}
+.spbu-filter-hint{
+    margin:8px 0 18px !important;
+    padding:10px 12px !important;
+    border:2px solid #bfdbfe !important;
+    border-radius:8px !important;
+    background:#eff6ff !important;
+    color:#0f172a !important;
+    font-size:clamp(.9rem,3.7vw,1.05rem) !important;
+    line-height:1.45 !important;
+}
+.spbu-filter-hint strong{color:#1d4ed8 !important;}
+
+@media (max-width:380px){
+    .spbu-filter-wrap{gap:8px !important;}
+    .spbu-filter-btn{
+        min-height:58px !important;
+        padding:8px 5px !important;
+        font-size:1.05rem !important;
+    }
+}
+
+</style>
 
   <!-- PWA additions -->
   <meta name="application-name" content="SO-LO Monitoring">
@@ -1009,6 +1184,16 @@
     <div id="resumeDashboardPage">
     <!-- DASHBOARD DISPLAY -->
     <h2>Dashboard Monitoring</h2>
+
+    <div class="dashboard-spbu-filter-wrap">
+        <div class="dashboard-spbu-filter" id="dashboardSPBUFilter" aria-label="Filter dashboard berdasarkan SPBU">
+            <button type="button" class="filter-spbu-blue" id="filterSPBU07" aria-pressed="false">SPBU-74.906.07</button>
+            <button type="button" class="filter-spbu-green" id="filterSPBU16" aria-pressed="false">SPBU-74.906.16</button>
+        </div>
+        <div class="dashboard-filter-help" role="note" aria-label="Petunjuk penggunaan filter SPBU">
+            <strong>Petunjuk:</strong> Klik 1x SPBU yang Anda ingin lihat. Klik kembali tombol yang sama untuk melihat semua.
+        </div>
+    </div>
 
     <h3>Bagian 1 — SO Aktif</h3>
     <div id="dashboardActive">Loading data...</div>
@@ -1539,7 +1724,7 @@
                 const products = so.so_products || [];
 
                 let html = `
-                    <div class="so-card${spbuShadeClass}">
+                    <div class="so-card${spbuShadeClass}" data-dashboard-spbu="${escapeHtml(so.spbu || '')}">
                         <div class="so-header">
                             <div class="so-header-left">
                                 <span>SO: ${escapeHtml(so.nomor_so)}</span>
@@ -1635,6 +1820,9 @@
             }
 
             renderSOPicker();
+            if (typeof window.applyDashboardSPBUFilter === 'function') {
+                window.applyDashboardSPBUFilter();
+            }
 
         } catch (error) {
             console.error('fetchDashboard error:', error);
@@ -1645,6 +1833,74 @@
             renderSOPicker();
         }
     }
+
+    // =========================
+    // FILTER DASHBOARD BERDASARKAN SPBU
+    // =========================
+    (function initDashboardSPBUFilter() {
+        const blueBtn = document.getElementById('filterSPBU07');
+        const greenBtn = document.getElementById('filterSPBU16');
+        const activeContainer = document.getElementById('dashboardActive');
+        const completedContainer = document.getElementById('dashboardCompleted');
+
+        if (!blueBtn || !greenBtn || !activeContainer || !completedContainer) return;
+
+        let activeFilter = '';
+
+        function setButtonState() {
+            blueBtn.classList.toggle('is-active', activeFilter === 'SPBU-74.906.07');
+            greenBtn.classList.toggle('is-active', activeFilter === 'SPBU-74.906.16');
+            blueBtn.setAttribute('aria-pressed', String(activeFilter === 'SPBU-74.906.07'));
+            greenBtn.setAttribute('aria-pressed', String(activeFilter === 'SPBU-74.906.16'));
+        }
+
+        function updateEmptyMessage(container, hasCards, visibleCount) {
+            let empty = container.querySelector('.dashboard-filter-empty');
+            if (!activeFilter || !hasCards || visibleCount > 0) {
+                if (empty) empty.remove();
+                return;
+            }
+            if (!empty) {
+                empty = document.createElement('div');
+                empty.className = 'dashboard-filter-empty';
+                container.appendChild(empty);
+            }
+            empty.textContent = `Tidak ada catatan untuk ${activeFilter}.`;
+        }
+
+        function applyFilter(filter) {
+            activeFilter = activeFilter === filter ? '' : filter;
+
+            [activeContainer, completedContainer].forEach(container => {
+                const cards = Array.from(container.querySelectorAll('.so-card'));
+                let visibleCount = 0;
+
+                cards.forEach(card => {
+                    const match = !activeFilter || card.dataset.dashboardSpbu === activeFilter;
+                    card.classList.toggle('dashboard-spbu-hidden', !match);
+                    if (match) visibleCount++;
+                });
+
+                updateEmptyMessage(container, cards.length > 0, visibleCount);
+            });
+
+            setButtonState();
+        }
+
+        blueBtn.addEventListener('click', () => applyFilter('SPBU-74.906.07'));
+        greenBtn.addEventListener('click', () => applyFilter('SPBU-74.906.16'));
+
+        // Saat data dashboard dimuat ulang, terapkan kembali filter yang sedang aktif.
+        window.applyDashboardSPBUFilter = function () {
+            if (activeFilter) {
+                const current = activeFilter;
+                activeFilter = '';
+                applyFilter(current);
+            }
+        };
+
+        setButtonState();
+    })();
 
     // =========================
     // SHADING SPBU PADA PILIHAN LO
