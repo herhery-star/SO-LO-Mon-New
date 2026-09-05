@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SO - LO Monitoring System</title>
+
+    <!-- PWA Configurations & Icons -->
+    <meta name="application-name" content="SO-LO Monitoring">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SO-LO Monitoring">
+    <meta name="theme-color" content="#121316">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./pwa_icon_192x192.png">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -106,7 +117,7 @@
     /* FILTER SPBU DASHBOARD */
     .dashboard-spbu-filter-wrap {
         margin: 0 0 20px;
-     font-size: 2rem; }
+       font-size: 2rem; }
 
     .dashboard-spbu-filter {
         display: flex;
@@ -502,7 +513,7 @@
             .so-header { align-items: flex-start; flex-direction: column; }
             .lo-item { margin-left: 0; }
         }
-    
+
     /* =========================
        INPUT SO LOCK (UI ONLY)
        ========================= */
@@ -552,7 +563,7 @@
             border-left: 6px solid #16a34a;
         }
 
-    
+
         /* =========================================
            PILIH SO PRODUK - TAB/KARTU PILIHAN
            Tambahan UI saja; select lama tetap dipakai
@@ -649,7 +660,7 @@
             .so-product-sisa { grid-column: 1 / -1; }
         }
 
-    
+
         /* =========================================
            HALAMAN 2 - PILIH SO PRODUK
         ========================================= */
@@ -841,7 +852,7 @@
             .so-picker-sisa { grid-column:1 / -1; }
         }
 
-    
+
 /* FINAL SPBU FILTER — mobile-friendly, side-by-side */
 .spbu-filter-wrap{
     display:grid !important;
@@ -915,24 +926,9 @@
     }
 }
 
-</style>
-
-  <!-- PWA additions -->
-  <meta name="application-name" content="SO-LO Monitoring">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="SO-LO Monitoring">
-  <meta name="theme-color" content="#c9003d">
-  <meta name="mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png">
-
-<style>
 /* RESUME BBM TERTINGGAL - tambahan */
 .resume-switch{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}.resume-switch button{min-height:42px;padding:10px 14px;cursor:pointer}.resume-page{display:none}.resume-page.active{display:block}.resume-card{border:1px solid #e2e8f0;border-radius:12px;margin:14px 0;overflow:hidden}.resume-head{padding:12px 14px;font-weight:700}.resume-head.blue{background:#eff6ff;border-left:6px solid #2563eb}.resume-head.green{background:#f0fdf4;border-left:6px solid #16a34a}.resume-table-wrap{overflow:auto}.resume-table{width:100%;border-collapse:collapse;min-width:650px}.resume-table th,.resume-table td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap}.resume-table th{background:#f8fafc;font-size:.8rem}.resume-total{font-weight:700;background:#fafafa}.resume-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}.resume-stat{border:1px solid #e2e8f0;border-radius:10px;padding:12px}.resume-stat b{display:block;font-size:1.25rem;margin-top:4px}
-</style>
 
-<style id="navigation-collapse-addon">
 /* =========================================
    ADD-ON: FLOATING NAVIGATION
    + COLLAPSE BAGIAN 2 — SO SELESAI
@@ -2717,40 +2713,5 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 
-</body>
-</html>
-
-
-
-
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Taurus App</title>
-  
-  <!-- Link Manifest -->
-  <link rel="manifest" href="/manifest.json">
-  
-  <!-- Apple Touch Icon -->
-  <link rel="apple-touch-icon" href="/images/icon-192.png">
-  
-  <!-- Theme Color untuk Navbar Browser -->
-  <meta name="theme-color" content="#121316">
-</head>
-<body>
-  <h1>Taurus Launcher PWA</h1>
-
-  <script>
-    // Mendaftarkan Service Worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then((reg) => console.log('Service Worker berhasil terdaftar:', reg))
-          .catch((err) => console.log('Pendaftaran Service Worker gagal:', err));
-      });
-    }
-  </script>
 </body>
 </html>
