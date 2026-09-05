@@ -2719,3 +2719,38 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
+
+
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taurus App</title>
+  
+  <!-- Link Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+  
+  <!-- Theme Color untuk Navbar Browser -->
+  <meta name="theme-color" content="#121316">
+</head>
+<body>
+  <h1>Taurus Launcher PWA</h1>
+
+  <script>
+    // Mendaftarkan Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((reg) => console.log('Service Worker berhasil terdaftar:', reg))
+          .catch((err) => console.log('Pendaftaran Service Worker gagal:', err));
+      });
+    }
+  </script>
+</body>
+</html>
