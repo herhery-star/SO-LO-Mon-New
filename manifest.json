@@ -1,0 +1,23 @@
+{
+  "short_name": "Taurus App",
+  "name": "Taurus Launcher PWA",
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#121316",
+  "theme_color": "#121316",
+  "display": "standalone",
+  "orientation": "portrait"
+}
