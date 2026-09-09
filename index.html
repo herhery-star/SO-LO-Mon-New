@@ -1373,6 +1373,54 @@ body.app-tab-dashboard .floating-nav-addon {
     }
 }
 
+
+/* Validasi Nomor LO: harus tepat 10 digit */
+.lo-number-warning {
+    display: none;
+    margin-top: 5px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+.lo-number-warning.show { display: block; }
+#lo_number.lo-number-invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.10);
+}
+
+/* =========================================================
+   LEGACY LO FORMAT WARNING
+   LO lama dengan nomor bukan tepat 10 digit tetap tampil/
+   dihitung, tetapi diberi penanda "Format lama".
+   ========================================================= */
+.lo-legacy-warning {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    line-height: 1.2;
+    vertical-align: middle;
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #fdba74;
+    white-space: nowrap;
+}
+
+.lo-legacy-warning-icon {
+    font-size: .8rem;
+}
+
+@media (max-width: 640px) {
+    .lo-legacy-warning {
+        font-size: .64rem;
+        padding: 1px 5px;
+        margin-left: 4px;
+    }
+}
+
 </style>
 
 </head>
@@ -1509,7 +1557,8 @@ body.app-tab-dashboard .floating-nav-addon {
 
                 <div class="form-group">
                     <label for="lo_number">Nomor LO</label>
-                    <input type="text" id="lo_number" required placeholder="Masukkan Nomor LO">
+                    <input type="text" id="lo_number" required placeholder="Masukkan Nomor LO" inputmode="numeric" autocomplete="off" aria-describedby="loNumberWarning">
+                    <small id="loNumberWarning" class="lo-number-warning" role="alert" aria-live="polite"></small>
                 </div>
 
                 <div class="form-group">
@@ -1673,6 +1722,23 @@ body.app-tab-dashboard .floating-nav-addon {
     }
 
     setDefaultDates();
+
+
+    // =========================
+    // LEGACY LO FORMAT CHECK
+    // LO lama tetap valid untuk ditampilkan/dihitung,
+    // tetapi diberi tanda jika bukan tepat 10 digit.
+    // =========================
+    function isLegacyLONumber(nomorLO) {
+        const digits = String(nomorLO ?? '').trim().replace(/\D/g, '');
+        return digits.length !== 10;
+    }
+
+    function legacyLOBadge(nomorLO) {
+        return isLegacyLONumber(nomorLO)
+            ? '<span class="lo-legacy-warning" title="Nomor LO lama tidak memenuhi format 10 digit"><span class="lo-legacy-warning-icon">⚠️</span> Format lama</span>'
+            : '';
+    }
 
     // =========================
     // SPBU SELECTION UNTUK INPUT LO
@@ -2274,7 +2340,7 @@ body.app-tab-dashboard .floating-nav-addon {
                         html += `
                             <div class="lo-item">
                                 <span>
-                                    LO ${escapeHtml(lo.nomor_lo)}
+                                    LO ${escapeHtml(lo.nomor_lo)}${legacyLOBadge(lo.nomor_lo)}
                                     (${formatDate(lo.tanggal_lo)})
                                     : ${lo.quantity_lo} KL
                                 </span>
@@ -2471,6 +2537,50 @@ body.app-tab-dashboard .floating-nav-addon {
     });
 
     // =========================
+    // VALIDASI NOMOR LO — TEPAT 10 DIGIT
+    // =========================
+    function validateLONumber10Digit(value, showWarning = true) {
+        const input = document.getElementById('lo_number');
+        const warning = document.getElementById('loNumberWarning');
+        const raw = String(value ?? '').trim();
+        const digitCount = (raw.match(/\d/g) || []).length;
+        let message = '';
+        let valid = true;
+
+        if (!raw) {
+            message = 'Nomor LO wajib diisi.';
+            valid = false;
+        } else if (!/^\d+$/.test(raw)) {
+            message = 'Nomor LO hanya boleh berisi angka.';
+            valid = false;
+        } else if (digitCount < 10) {
+            message = `Nomor LO harus tepat 10 digit. Saat ini baru ${digitCount} digit.`;
+            valid = false;
+        } else if (digitCount > 10) {
+            message = `Nomor LO harus tepat 10 digit. Saat ini ${digitCount} digit.`;
+            valid = false;
+        }
+
+        if (input && warning) {
+            input.classList.toggle('lo-number-invalid', !valid);
+            warning.textContent = message;
+            warning.classList.toggle('show', showWarning && !valid);
+        }
+
+        return valid;
+    }
+
+    const loNumberInput = document.getElementById('lo_number');
+    if (loNumberInput) {
+        loNumberInput.addEventListener('input', () => {
+            validateLONumber10Digit(loNumberInput.value, true);
+        });
+        loNumberInput.addEventListener('blur', () => {
+            validateLONumber10Digit(loNumberInput.value, true);
+        });
+    }
+
+    // =========================
     // FORM HANDLER: CREATE LO
     // =========================
     document.getElementById('formLO').addEventListener('submit', async (event) => {
@@ -2479,6 +2589,8 @@ body.app-tab-dashboard .floating-nav-addon {
         if (!sb) { alert("Koneksi Supabase belum siap."); return; }
 
         const p_nomor_lo = document.getElementById('lo_number').value.trim();
+        if (!validateLONumber10Digit(p_nomor_lo, true)) return;
+
         const p_tanggal_lo = document.getElementById('lo_date').value;
         const p_so_product_id = document.getElementById('lo_so_product_select').value;
         const p_quantity_lo = Number(document.getElementById('lo_quantity').value);
@@ -2969,6 +3081,19 @@ body.app-tab-dashboard .floating-nav-addon {
                 if (!sb) return;
 
                 const nomor_lo = document.getElementById('edit_lo_nomor').value.trim();
+                if (!/^\d{10}$/.test(nomor_lo)) {
+                    const digitCount = (nomor_lo.match(/\d/g) || []).length;
+                    if (!nomor_lo) {
+                        alert('Nomor LO wajib diisi.');
+                    } else if (!/^\d+$/.test(nomor_lo)) {
+                        alert('Nomor LO hanya boleh berisi angka.');
+                    } else if (digitCount < 10) {
+                        alert(`Nomor LO harus tepat 10 digit. Saat ini baru ${digitCount} digit.`);
+                    } else {
+                        alert(`Nomor LO harus tepat 10 digit. Saat ini ${digitCount} digit.`);
+                    }
+                    return;
+                }
                 const tanggal_lo = document.getElementById('edit_lo_tanggal').value;
                 const quantity_lo = Number(document.getElementById('edit_lo_qty').value);
                 const targetProductId = document.getElementById('edit_lo_so_product').value;
