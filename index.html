@@ -754,10 +754,101 @@
             color: #294b78;
         }
 
+        /* PILIH SPBU UNTUK INPUT LO */
+        .lo-spbu-selector {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .lo-spbu-btn {
+            width: 100%;
+            min-height: 52px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 1rem;
+            letter-spacing: .01em;
+            border: 3px solid transparent;
+            box-shadow: 0 3px 0 rgba(15,23,42,.35), 0 5px 10px rgba(15,23,42,.12);
+            transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+        }
+
+        .lo-spbu-btn.spbu-blue {
+            background: #1e40af;
+            border-color: #172554;
+        }
+
+        .lo-spbu-btn.spbu-green {
+            background: #15803d;
+            border-color: #14532d;
+        }
+
+        .lo-spbu-btn:not(.active) {
+            opacity: .72;
+        }
+
+        .lo-spbu-btn.active {
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+
+        .lo-spbu-btn.spbu-blue.active {
+            background: #1d4ed8;
+            border-color: #020617;
+            box-shadow: 0 0 0 2px #60a5fa, 0 3px 0 #0f172a, 0 5px 12px rgba(30,64,175,.35);
+        }
+
+        .lo-spbu-btn.spbu-green.active {
+            background: #16a34a;
+            border-color: #052e16;
+            box-shadow: 0 0 0 2px #4ade80, 0 3px 0 #052e16, 0 5px 12px rgba(21,128,61,.35);
+        }
+
+        .lo-spbu-hint {
+            margin-top: 7px;
+            color: #64748b;
+            font-size: .82rem;
+            line-height: 1.4;
+        }
+
         .lo-input-card button[type="submit"] {
             min-height: 52px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(37, 99, 235, .22);
+            transition: background .15s ease, box-shadow .15s ease, opacity .15s ease;
+        }
+
+        .lo-input-card #saveLOBtn.lo-save-blue {
+            background: #2563eb;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, .28);
+        }
+
+        .lo-input-card #saveLOBtn.lo-save-green {
+            background: #16a34a;
+            box-shadow: 0 4px 10px rgba(22, 163, 74, .28);
+        }
+
+        .lo-input-card #saveLOBtn.lo-save-disabled {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: .85;
+        }
+
+        @media (max-width: 640px) {
+            .lo-spbu-selector {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .lo-spbu-btn {
+                min-height: 54px;
+                padding: 9px 6px;
+                font-size: .88rem;
+            }
         }
 
         .so-picker-header {
@@ -1170,6 +1261,19 @@ body.app-tab-dashboard .floating-nav-addon {
 
             <form id="formLO">
                 <div class="form-group">
+                    <label>Pilih SPBU</label>
+                    <div class="lo-spbu-selector" id="loSPBUSelector" role="group" aria-label="Pilih SPBU untuk Loading Order">
+                        <button type="button" class="lo-spbu-btn spbu-blue" data-lo-spbu="SPBU-74.906.07" aria-pressed="false">
+                            SPBU-74.906.07
+                        </button>
+                        <button type="button" class="lo-spbu-btn spbu-green" data-lo-spbu="SPBU-74.906.16" aria-pressed="false">
+                            SPBU-74.906.16
+                        </button>
+                    </div>
+                    <div class="lo-spbu-hint">Pilih SPBU terlebih dahulu. Pilihan ini akan memfilter SO Produk dan menentukan warna tombol Simpan LO.</div>
+                </div>
+
+                <div class="form-group">
                     <label for="lo_number">Nomor LO</label>
                     <input type="text" id="lo_number" required placeholder="Masukkan Nomor LO">
                 </div>
@@ -1196,7 +1300,7 @@ body.app-tab-dashboard .floating-nav-addon {
                     </select>
                 </div>
 
-                <button type="submit">Simpan LO</button>
+                <button type="submit" id="saveLOBtn" class="lo-save-disabled">Simpan LO</button>
             </form>
         </div>
     </div>
@@ -1337,6 +1441,108 @@ body.app-tab-dashboard .floating-nav-addon {
     setDefaultDates();
 
     // =========================
+    // SPBU SELECTION UNTUK INPUT LO
+    // =========================
+    let selectedLOSPBU = '';
+
+    function updateLOSPBUUI() {
+        const buttons = document.querySelectorAll('#loSPBUSelector .lo-spbu-btn');
+        const saveBtn = document.getElementById('saveLOBtn');
+
+        buttons.forEach(btn => {
+            const active = btn.dataset.loSpbu === selectedLOSPBU;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', String(active));
+        });
+
+        if (!saveBtn) return;
+
+        saveBtn.classList.remove('lo-save-blue', 'lo-save-green', 'lo-save-disabled');
+
+        if (selectedLOSPBU === 'SPBU-74.906.07') {
+            saveBtn.classList.add('lo-save-blue');
+        } else if (selectedLOSPBU === 'SPBU-74.906.16') {
+            saveBtn.classList.add('lo-save-green');
+        } else {
+            saveBtn.classList.add('lo-save-disabled');
+        }
+    }
+
+    function resetLOSOProductSelection() {
+        const select = document.getElementById('lo_so_product_select');
+        const trigger = document.getElementById('openSOPickerBtn');
+
+        if (select) {
+            select.value = '';
+            select.classList.remove('spbu-select-blue', 'spbu-select-green');
+        }
+
+        if (trigger) {
+            trigger.textContent = '📋 Pilih SO Produk';
+        }
+    }
+
+    // Cache SO Produk agar pergantian SPBU tidak perlu query ulang ke database.
+    let loSOProductCache = [];
+
+    function renderLOSOProductOptions() {
+        const select = document.getElementById('lo_so_product_select');
+        if (!select) return;
+
+        select.innerHTML = '<option value="">-- Pilih SO Produk --</option>';
+
+        if (!selectedLOSPBU) return;
+
+        loSOProductCache
+            .filter(item => item.spbu === selectedLOSPBU)
+            .forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.dataset.product = item.productName;
+                option.dataset.remaining = String(item.remaining);
+                option.dataset.spbu = item.spbu;
+                option.dataset.tanggal = item.tanggal;
+                option.dataset.nomorSo = item.nomorSo;
+
+                if (item.spbu === 'SPBU-74.906.07') {
+                    option.style.backgroundColor = '#dbeafe';
+                    option.classList.add('spbu-option-blue');
+                } else if (item.spbu === 'SPBU-74.906.16') {
+                    option.style.backgroundColor = '#dcfce7';
+                    option.classList.add('spbu-option-green');
+                }
+
+                option.textContent =
+                    `${item.nomorSo} | ${item.tanggal}${item.spbu ? ' | ' + item.spbu : ''} | ${item.productName} | Sisa: ${item.remaining} KL`;
+
+                select.appendChild(option);
+            });
+
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function selectLOSPBU(spbu) {
+        if (!['SPBU-74.906.07', 'SPBU-74.906.16'].includes(spbu)) return;
+
+        const changed = selectedLOSPBU !== spbu;
+        selectedLOSPBU = spbu;
+
+        updateLOSPBUUI();
+
+        // Jika SPBU berubah, SO Produk lama tidak boleh terbawa ke SPBU baru.
+        if (changed) resetLOSOProductSelection();
+
+        renderLOSOProductOptions();
+        renderSOPicker();
+    }
+
+    document.querySelectorAll('#loSPBUSelector .lo-spbu-btn').forEach(btn => {
+        btn.addEventListener('click', () => selectLOSPBU(btn.dataset.loSpbu));
+    });
+
+    updateLOSPBUUI();
+
+    // =========================
     // CUSTOM CONFIRMATION MODAL
     // =========================
     const deleteModal = document.getElementById('deleteModal');
@@ -1394,10 +1600,18 @@ body.app-tab-dashboard .floating-nav-addon {
         if (!select || !list) return;
 
         list.innerHTML = '';
-        const options = Array.from(select.options).filter(option => option.value);
+
+        if (!selectedLOSPBU) {
+            list.innerHTML = '<div class="so-picker-empty">Pilih SPBU pada Input LO terlebih dahulu agar daftar SO Produk terfilter.</div>';
+            return;
+        }
+
+        const options = Array.from(select.options).filter(option =>
+            option.value && option.dataset.spbu === selectedLOSPBU
+        );
 
         if (!options.length) {
-            list.innerHTML = '<div class="so-picker-empty">Belum ada SO Produk yang masih memiliki sisa kuantitas.</div>';
+            list.innerHTML = `<div class="so-picker-empty">Belum ada SO Produk ${escapeHtml(selectedLOSPBU)} yang masih memiliki sisa kuantitas.</div>`;
             return;
         }
 
@@ -1465,6 +1679,12 @@ body.app-tab-dashboard .floating-nav-addon {
         const select = document.getElementById('lo_so_product_select');
         if (!option || !select) {
             closeSOVerification();
+            return;
+        }
+
+        if (option.dataset.spbu !== selectedLOSPBU) {
+            closeSOVerification();
+            alert('SO Produk tersebut tidak sesuai dengan SPBU yang sedang dipilih.');
             return;
         }
 
@@ -1752,6 +1972,7 @@ body.app-tab-dashboard .floating-nav-addon {
             activeContainer.innerHTML = '';
             completedContainer.innerHTML = '';
             loSelect.innerHTML = '<option value="">-- Pilih SO Produk --</option>';
+            loSOProductCache = [];
 
             const activeSOs = safeList
                 .filter(so => !so.completed_at)
@@ -1796,25 +2017,14 @@ body.app-tab-dashboard .floating-nav-addon {
                     }
 
                     if (isActive && totalLO < prod.quantity_so) {
-                        const option = document.createElement('option');
-                        option.value = prod.id;
-                        option.dataset.product = prod.product_name || '';
-                        option.dataset.remaining = String(sisa);
-                        option.dataset.spbu = so.spbu || '';
-                        option.dataset.tanggal = formatDate(so.tanggal_so);
-                        option.dataset.nomorSo = so.nomor_so || '';
-
-                        // Shading pilihan berdasarkan SPBU
-                        if (so.spbu === 'SPBU-74.906.07') {
-                            option.style.backgroundColor = '#dbeafe';
-                            option.classList.add('spbu-option-blue');
-                        } else if (so.spbu === 'SPBU-74.906.16') {
-                            option.style.backgroundColor = '#dcfce7';
-                            option.classList.add('spbu-option-green');
-                        }
-
-                        option.textContent = `${so.nomor_so} | ${formatDate(so.tanggal_so)}${so.spbu ? ' | ' + so.spbu : ''} | ${prod.product_name} | Sisa: ${sisa} KL`;
-                        loSelect.appendChild(option);
+                        loSOProductCache.push({
+                            id: prod.id,
+                            productName: prod.product_name || '',
+                            remaining: sisa,
+                            spbu: so.spbu || '',
+                            tanggal: formatDate(so.tanggal_so),
+                            nomorSo: so.nomor_so || ''
+                        });
                     }
 
                     html += `
@@ -1864,6 +2074,7 @@ body.app-tab-dashboard .floating-nav-addon {
                 completedSOs.forEach(so => renderSO(so, completedContainer, false));
             }
 
+            renderLOSOProductOptions();
             renderSOPicker();
             if (typeof window.applyDashboardSPBUFilter === 'function') {
                 window.applyDashboardSPBUFilter();
@@ -1875,6 +2086,7 @@ body.app-tab-dashboard .floating-nav-addon {
             activeContainer.innerHTML = `<div class="empty-state" style="color:#b91c1c;border-color:#fecaca;background:#fff1f2;"><strong>Gagal memuat dashboard SO Aktif.</strong><br>${escapeHtml(message)}</div>`;
             completedContainer.innerHTML = `<div class="empty-state" style="color:#b91c1c;border-color:#fecaca;background:#fff1f2;"><strong>Gagal memuat dashboard SO Selesai.</strong></div>`;
             loSelect.innerHTML = '<option value="">-- Pilih SO Produk --</option>';
+            loSOProductCache = [];
             renderSOPicker();
         }
     }
@@ -2037,12 +2249,24 @@ body.app-tab-dashboard .floating-nav-addon {
         const p_so_product_id = document.getElementById('lo_so_product_select').value;
         const p_quantity_lo = Number(document.getElementById('lo_quantity').value);
 
+        if (!selectedLOSPBU) {
+            alert('Pilih SPBU terlebih dahulu.');
+            return;
+        }
+
         if (!p_so_product_id) {
             alert('Pilih SO dan produk terlebih dahulu.');
             return;
         }
 
         const selectedOption = document.getElementById('lo_so_product_select').selectedOptions[0];
+        const selectedSPBU = selectedOption?.dataset?.spbu || '';
+
+        if (selectedSPBU !== selectedLOSPBU) {
+            alert('SO Produk yang dipilih tidak sesuai dengan SPBU yang dipilih.');
+            return;
+        }
+
         const productName = selectedOption.dataset.product;
         const remaining = Number(selectedOption.dataset.remaining);
 
@@ -2071,6 +2295,11 @@ body.app-tab-dashboard .floating-nav-addon {
         alert('LO berhasil ditambahkan.');
         document.getElementById('formLO').reset();
         setDefaultDates();
+
+        // SPBU tetap dipertahankan agar input LO berikutnya tetap pada SPBU yang sama.
+        resetLOSOProductSelection();
+        updateLOSPBUUI();
+
         await fetchDashboard();
     });
 
