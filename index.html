@@ -927,7 +927,32 @@
 }
 
 /* RESUME BBM TERTINGGAL - tambahan */
-.resume-switch{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}.resume-switch button{min-height:42px;padding:10px 14px;cursor:pointer}.resume-page{display:none}.resume-page.active{display:block}.resume-card{border:1px solid #e2e8f0;border-radius:12px;margin:14px 0;overflow:hidden}.resume-head{padding:12px 14px;font-weight:700}.resume-head.blue{background:#eff6ff;border-left:6px solid #2563eb}.resume-head.green{background:#f0fdf4;border-left:6px solid #16a34a}.resume-table-wrap{overflow:auto}.resume-table{width:100%;border-collapse:collapse;min-width:650px}.resume-table th,.resume-table td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap}.resume-table th{background:#f8fafc;font-size:.8rem}.resume-total{font-weight:700;background:#fafafa}.resume-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}.resume-stat{border:1px solid #e2e8f0;border-radius:10px;padding:12px}.resume-stat b{display:block;font-size:1.25rem;margin-top:4px}
+/* V1 MOBILE-FIRST NAV + TERTINGGAL */
+.resume-switch{display:none}
+.resume-page{display:none}.resume-page.active{display:block}
+.resume-card{border:1px solid #dbe3ec;border-radius:14px;margin:12px 0;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(15,23,42,.05)}
+.resume-head{padding:11px 13px;font-weight:800;font-size:.98rem;border-bottom:1px solid #e2e8f0}.resume-head.blue{background:linear-gradient(90deg,#93c5fd 0%,#bfdbfe 50%,#eff6ff 100%);border-left:6px solid #2563eb;color:#1e3a8a;box-shadow:inset 0 1px 0 rgba(37,99,235,.16)}.resume-head.green{background:linear-gradient(90deg,#86efac 0%,#bbf7d0 50%,#f0fdf4 100%);border-left:6px solid #16a34a;color:#166534;box-shadow:inset 0 1px 0 rgba(22,163,74,.16)}
+.resume-table-wrap{overflow:visible}.resume-table{width:100%;border-collapse:collapse;min-width:0}.resume-table th,.resume-table td{padding:8px 7px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:normal;font-size:.78rem}.resume-table th{background:#f8fafc;font-size:.72rem}.resume-total{font-weight:700;background:#fafafa}
+.resume-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px}.resume-stat{border:1px solid #dbe3ec;border-radius:10px;padding:8px 7px;font-size:.68rem;line-height:1.15;background:#fff}.resume-stat b{display:block;font-size:1rem;margin-top:4px}
+.resume-mobile-list{padding:5px 8px 8px}.resume-mobile-row{padding:9px 2px;border-bottom:1px solid #e2e8f0}.resume-mobile-row:last-child{border-bottom:0}.resume-row-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.resume-row-title{font-weight:800;font-size:.82rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.resume-row-date{font-size:.68rem;color:#64748b;white-space:nowrap}.resume-row-sub{font-size:.72rem;color:#475569;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.resume-row-nums{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:6px}.resume-row-num{background:#f8fafc;border-radius:7px;padding:5px 6px;font-size:.68rem}.resume-row-num b{display:block;font-size:.82rem;color:#0f172a}.resume-row-num.sisa{background:#fff7ed}.resume-row-num.sisa b{color:#c2410c}
+/* Warna produk khusus Tab Tertinggal */
+.tertinggal-product{font-weight:800;white-space:nowrap}
+.tertinggal-product.pertalite{color:#2563eb}
+.tertinggal-product.biosolar{color:#16a34a}
+.tertinggal-product.pertamax{color:#ea580c}
+.tertinggal-product.px-turbo{color:#7c3aed}
+.tertinggal-product.dexlite{color:#dc2626}
+.tertinggal-product-separator{color:#94a3b8;font-weight:700;margin:0 5px}
+.resume-total .tertinggal-product-list{display:flex;flex-wrap:wrap;align-items:center;gap:2px 0;font-size:.74rem;line-height:1.55}
+.resume-total .tertinggal-total-title{font-weight:800;font-size:.82rem;margin-bottom:6px}
+.app-tab{display:none}.app-tab.active{display:block}.app-tab.active:not(#loTabPage) .so-lock-panel,.app-tab.active:not(#loTabPage) #soInputCard{display:none !important}.app-tab.active#loTabPage:not(.show-editor-so) .so-lock-panel,.app-tab.active#loTabPage:not(.show-editor-so) #soInputCard{display:none !important}/* V1: Editor + area Input SO/LO hanya terlihat pada Tab LO. */
+    body.app-tab-dashboard .editor-bar, body.app-tab-dashboard > .container > .grid, body.app-tab-tertinggal .editor-bar, body.app-tab-tertinggal > .container > .grid { display:none !important; }
+    .app-tab-nav{position:fixed;left:0;right:0;bottom:0;z-index:10000;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid #cbd5e1;box-shadow:0 -4px 16px rgba(15,23,42,.10);backdrop-filter:blur(8px)}
+.app-tab-btn{min-width:0;min-height:48px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#334155;font-weight:800;font-size:.78rem;line-height:1.05;cursor:pointer}.app-tab-btn.active{background:#0f172a;color:#fff;border-color:#0f172a}.app-tab-btn small{display:block;font-size:.62rem;font-weight:600;margin-top:3px;opacity:.8}
+body{padding-bottom:82px}
+@media (min-width:801px){body{padding-bottom:92px}.app-tab-nav{left:50%;right:auto;transform:translateX(-50%);width:min(620px,calc(100% - 24px));border:1px solid #cbd5e1;border-radius:14px;bottom:12px}}
+@media (max-width:480px){.container{padding:0 10px}.resume-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.resume-stat{font-size:.62rem}.resume-stat b{font-size:.92rem}.resume-row-nums{gap:4px}}
+
 
 /* =========================================
    ADD-ON: FLOATING NAVIGATION
@@ -1172,12 +1197,11 @@
         </div>
     </div>
 
-    <!-- TAMBAHAN RESUME: NAVIGASI -->
-    <div class="resume-switch">
-      <button type="button" id="resumeDashboardTab">Dashboard</button>
-      <button type="button" id="resumeBBMTab">Resume BBM Tertinggal</button>
-    </div>
-    <div id="resumeDashboardPage">
+    <!-- V1: 3 TAB UTAMA -->
+    <div id="loTabPage" class="app-tab active">
+    </div><!-- /loTabPage -->
+
+    <div id="resumeDashboardPage" class="app-tab">
     <!-- DASHBOARD DISPLAY -->
     <h2>Dashboard Monitoring</h2>
 
@@ -1207,13 +1231,19 @@
     </div>
     <div id="dashboardCompleted" class="completed-collapsed-addon">Loading data...</div>
     </div>
-    <!-- TAMBAHAN RESUME BBM TERTINGGAL -->
-    <div id="resumeBBMPage" class="resume-page">
+    </div><!-- /resumeDashboardPage -->
+
+    <!-- TAB 3: TERTINGGAL -->
+    <div id="resumeBBMPage" class="app-tab resume-page">
       <h2>Resume BBM Tertinggal</h2>
       <div id="resumeBBMContent">Memuat data...</div>
     </div>
 </div>
-
+    <nav class="app-tab-nav" aria-label="Navigasi utama">
+      <button type="button" class="app-tab-btn active" data-app-tab="lo">📋 LO<small>Input Loading Order</small></button>
+      <button type="button" class="app-tab-btn" data-app-tab="dashboard">📊 Dashboard<small>Monitoring</small></button>
+      <button type="button" class="app-tab-btn" data-app-tab="tertinggal">⚠️ Tertinggal<small>Belum Terkirim</small></button>
+    </nav>
 
 <!-- EDITOR / PIN MODAL -->
 <div class="modal-overlay" id="pinModal" aria-hidden="true">
@@ -1565,15 +1595,26 @@
           const pembelianKemarin = data.filter(r => String(r.tanggal).slice(0, 10) === yesterdayKey);
           const tertinggalLama = data.filter(r => String(r.tanggal).slice(0, 10) <= twoDaysAgoKey);
 
+          // Urutan produk khusus Tab Tertinggal. Produk tanpa SO/riwayat tidak ditampilkan.
+          const PRODUCT_ORDER_TERTINGGAL = ['Pertalite', 'Biosolar', 'Pertamax', 'PX Turbo', 'Dexlite'];
+
+          function orderedProductNames(totals) {
+            const known = PRODUCT_ORDER_TERTINGGAL.filter(nama => Object.prototype.hasOwnProperty.call(totals, nama) && Number(totals[nama]) > 0);
+            const others = Object.keys(totals)
+              .filter(nama => !PRODUCT_ORDER_TERTINGGAL.includes(nama) && Number(totals[nama]) > 0)
+              .sort();
+            return [...known, ...others];
+          }
+
           function productSummary(list) {
             const totals = {};
             list.forEach(r => {
               const nama = r.produk || 'Produk Lain';
+              if (Number(r.soQty || 0) <= 0) return;
               totals[nama] = (totals[nama] || 0) + r.sisa;
             });
 
-            return Object.keys(totals)
-              .sort()
+            return orderedProductNames(totals)
               .map(nama => `${escapeHtml(nama)}: <b>${totals[nama]} KL</b>`)
               .join(' &nbsp; | &nbsp; ') || '<span style="color:#94a3b8">Tidak ada</span>';
           }
@@ -1581,13 +1622,27 @@
           const totalProduk = {};
           data.forEach(r => {
             const nama = r.produk || 'Produk Lain';
+            if (Number(r.soQty || 0) <= 0) return;
             totalProduk[nama] = (totalProduk[nama] || 0) + r.sisa;
           });
 
-          const productDetails = Object.keys(totalProduk)
-            .sort()
-            .map(nama => `${escapeHtml(nama)}: <b>${totalProduk[nama]} KL</b>`)
-            .join(' &nbsp; | &nbsp; ');
+          function productColorClass(nama) {
+            const key = String(nama || '').toLowerCase().trim();
+            return {
+              'pertalite': 'pertalite',
+              'biosolar': 'biosolar',
+              'pertamax': 'pertamax',
+              'px turbo': 'px-turbo',
+              'dexlite': 'dexlite'
+            }[key] || '';
+          }
+
+          const productDetails = orderedProductNames(totalProduk)
+            .map(nama => {
+              const cls = productColorClass(nama);
+              return `<span class="tertinggal-product ${cls}">${escapeHtml(nama)} ${totalProduk[nama]} KL</span>`;
+            })
+            .join('<span class="tertinggal-product-separator">I</span>');
 
           const oldDates = tertinggalLama
             .map(r => String(r.tanggal).slice(0, 10))
@@ -1599,42 +1654,32 @@
 
           content += `<div class="resume-card">
             <div class="resume-head ${shade}">${escapeHtml(n)}</div>
-            <div class="resume-table-wrap">
-              <table class="resume-table">
-                <thead>
-                  <tr>
-                    <th>Tanggal</th>
-                    <th>Nomor SO</th>
-                    <th>Produk</th>
-                    <th>SO</th>
-                    <th>Terkirim</th>
-                    <th>Belum Terkirim</th>
-                  </tr>
-                </thead>
-                <tbody>`;
+            <div class="resume-mobile-list">`;
 
           data.forEach(r => {
-            content += `<tr>
-              <td>${formatDate(r.tanggal)}</td>
-              <td>${escapeHtml(r.nomor)}</td>
-              <td>${escapeHtml(r.produk)}</td>
-              <td>${r.soQty} KL</td>
-              <td>${r.terkirim} KL</td>
-              <td><b>${r.sisa} KL</b></td>
-            </tr>`;
+            content += `<div class="resume-mobile-row">
+              <div class="resume-row-top">
+                <div class="resume-row-title">${escapeHtml(r.nomor)} · ${escapeHtml(r.produk)}</div>
+                <div class="resume-row-date">${formatDate(r.tanggal)}</div>
+              </div>
+              <div class="resume-row-sub">SO ${r.soQty} KL · Terkirim ${r.terkirim} KL</div>
+              <div class="resume-row-nums">
+                <div class="resume-row-num">SO<b>${r.soQty} KL</b></div>
+                <div class="resume-row-num">Terkirim<b>${r.terkirim} KL</b></div>
+                <div class="resume-row-num sisa">Sisa<b>${r.sisa} KL</b></div>
+              </div>
+            </div>`;
           });
 
-          content += `<tr class="resume-total">
-            <td colspan="6">
-              <div style="font-weight:700;font-size:.95rem;margin-bottom:10px;">TOTAL ${escapeHtml(n)}</div>
-              <div style="display:grid;gap:6px;font-size:.82rem;font-weight:500;color:#475569;line-height:1.55;">
-                <div><b>Pembelian Hari Ini (${formatDate(todayKey)}) : </b> ${productSummary(pembelianHariIni)}</div>
-                <div><b>Pembelian Kemarin yg Blm Terkirim(${formatDate(yesterdayKey)}) : </b> ${productSummary(pembelianKemarin)}</div>
-                <div><b>Tertinggal (${tanggalTertinggal}) : </b> ${productSummary(tertinggalLama)}</div>
-                <div><b>Total Stok Belum Terkirim : </b> ${productDetails}</div>
+          content += `<div class="resume-total" style="margin:6px 0 0;padding:9px 2px;border-top:1px solid #e2e8f0;">
+              <div class="tertinggal-total-title">TOTAL STOK BELUM DITERIMA :</div>
+              <div class="tertinggal-product-list">${productDetails || '<span style="color:#94a3b8">Tidak ada</span>'}</div>
+              <div style="display:grid;gap:5px;font-size:.69rem;font-weight:500;color:#475569;line-height:1.4;margin-top:7px;">
+                <div><b>Hari ini:</b> ${productSummary(pembelianHariIni)}</div>
+                <div><b>Kemarin:</b> ${productSummary(pembelianKemarin)}</div>
+                <div><b>≥ 2 hari:</b> ${productSummary(tertinggalLama)}</div>
               </div>
-            </td>
-          </tr></tbody></table></div></div>`;
+            </div></div></div>`;
         });
 
         target.innerHTML = content;
@@ -2104,6 +2149,7 @@
 
     function unlockSOInput() {
         soInputUnlocked = true;
+        document.getElementById('loTabPage')?.classList.add('show-editor-so');
         document.getElementById('soInputCard').classList.remove('so-input-locked');
         document.getElementById('soLockPanel').style.display = 'none';
         document.getElementById('so_number').focus();
@@ -2111,6 +2157,7 @@
 
     function lockSOInput() {
         soInputUnlocked = false;
+        document.getElementById('loTabPage')?.classList.remove('show-editor-so');
         document.getElementById('soInputCard').classList.add('so-input-locked');
         document.getElementById('soLockPanel').style.display = '';
     }
@@ -2594,13 +2641,33 @@
         initSOPickerControls();
     }
 
-    // Event untuk elemen lain yang berada setelah script utama.
-    window.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('resumeDashboardTab')
-            ?.addEventListener('click', closeResumeBBM);
+    // V1: navigasi 3 tab utama — UI only, data/Supabase logic tetap sama.
+    function setAppTab(tab) {
+        // Sinkronkan area global agar Editor + Input SO/LO hanya muncul pada Tab LO.
+        document.body.classList.remove('app-tab-lo', 'app-tab-dashboard', 'app-tab-tertinggal');
+        document.body.classList.add(`app-tab-${tab}`);
 
-        document.getElementById('resumeBBMTab')
-            ?.addEventListener('click', openResumeBBM);
+        const pages = {
+            lo: document.getElementById('loTabPage'),
+            dashboard: document.getElementById('resumeDashboardPage'),
+            tertinggal: document.getElementById('resumeBBMPage')
+        };
+        Object.entries(pages).forEach(([key, el]) => {
+            if (el) el.classList.toggle('active', key === tab);
+        });
+        document.querySelectorAll('.app-tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.appTab === tab);
+        });
+        if (tab === 'tertinggal') renderResumeBBM();
+        window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.app-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => setAppTab(btn.dataset.appTab));
+        });
+        // Mulai dari workflow operasional: Input LO.
+        setAppTab('lo');
     });
 
     document.addEventListener('keydown', (event) => {
