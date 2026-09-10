@@ -2012,7 +2012,6 @@ body.app-tab-dashboard .floating-nav-addon {
                 option.dataset.spbu = item.spbu;
                 option.dataset.tanggal = item.tanggal;
                 option.dataset.nomorSo = item.nomorSo;
-                option.dataset.nomorLo = item.nomorLO || '';
 
                 if (item.spbu === 'SPBU-74.906.07') {
                     option.style.backgroundColor = '#dbeafe';
@@ -2130,9 +2129,9 @@ body.app-tab-dashboard .floating-nav-addon {
         const filteredOptions = !keyword
             ? options
             : options.filter(option => {
-                const nomorLO = String(option.dataset.nomorLo || '').toLowerCase();
+                const nomorSO = String(option.dataset.nomorSo || '').toLowerCase();
                 const product = String(option.dataset.product || '').toLowerCase();
-                return nomorLO.includes(keyword) || product.includes(keyword);
+                return nomorSO.includes(keyword) || product.includes(keyword);
             });
 
         if (!filteredOptions.length) {
@@ -2140,7 +2139,7 @@ body.app-tab-dashboard .floating-nav-addon {
                 <div class="so-picker-empty">
                     Tidak ditemukan SO Produk untuk pencarian
                     "<strong>${escapeHtml(searchInput?.value || '')}</strong>".
-                    <br>Gunakan nomor LO atau nama produk.
+                    <br>Gunakan nomor SO atau nama produk.
                 </div>`;
             return;
         }
@@ -3937,8 +3936,8 @@ if ('serviceWorker' in navigator) {
                     type="search"
                     id="soPickerSearch"
                     class="so-picker-search"
-                    placeholder="Cari nomor LO atau produk..."
-                    aria-label="Cari nomor LO atau produk"
+                    placeholder="Cari nomor SO atau produk..."
+                    aria-label="Cari nomor SO atau produk"
                     autocomplete="off"
                 >
             </div>
