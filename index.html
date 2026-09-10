@@ -1161,6 +1161,10 @@
 .tertinggal-product-separator{color:#94a3b8;font-weight:700;margin:0 5px}
 .resume-total .tertinggal-product-list{display:flex;flex-wrap:wrap;align-items:center;gap:2px 0;font-size:.74rem;line-height:1.55}
 .resume-total .tertinggal-total-title{font-weight:800;font-size:.82rem;margin-bottom:6px}
+.tertinggal-received{margin:6px 0 10px;padding:9px 2px 8px;border-top:1px solid #bbf7d0;border-bottom:1px solid #dcfce7;background:linear-gradient(90deg,rgba(240,253,244,.72),rgba(255,255,255,.45))}
+.tertinggal-received-title{font-weight:800;font-size:.82rem;color:#166534;margin-bottom:6px}
+.tertinggal-received-lines{display:grid;gap:5px;font-size:.69rem;font-weight:500;color:#475569;line-height:1.4}
+.tertinggal-received-lines b{color:#166534}
 .app-tab{display:none}.app-tab.active{display:block}.app-tab.active:not(#loTabPage) .so-lock-panel,.app-tab.active:not(#loTabPage) #soInputCard{display:none !important}.app-tab.active#loTabPage:not(.show-editor-so) .so-lock-panel,.app-tab.active#loTabPage:not(.show-editor-so) #soInputCard{display:none !important}/* V1: Editor + area Input SO/LO hanya terlihat pada Tab LO. */
     body.app-tab-dashboard .editor-bar, body.app-tab-dashboard .top-control-row, body.app-tab-dashboard > .container > .grid, body.app-tab-tertinggal .editor-bar, body.app-tab-tertinggal .top-control-row, body.app-tab-tertinggal > .container > .grid { display:none !important; }
     .app-tab-nav{position:fixed;left:0;right:0;bottom:0;z-index:10000;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid #cbd5e1;box-shadow:0 -4px 16px rgba(15,23,42,.10);backdrop-filter:blur(8px)}
@@ -2144,6 +2148,42 @@ body.app-tab-dashboard .floating-nav-addon {
               .join(' &nbsp; | &nbsp; ') || '<span style="color:#94a3b8">Tidak ada</span>';
           }
 
+          // STOK YANG SUDAH DITERIMA dihitung dari tanggal LO dan quantity LO.
+          // Hanya LO aktif yang dihitung; LO dengan deleted_at tidak disertakan.
+          const receivedRows = [];
+          (resumeSOData || []).forEach(so => {
+            (so.so_products || []).forEach(product => {
+              (product.lo || []).forEach(lo => {
+                if (lo.deleted_at) return;
+                const qty = Number(lo.quantity_lo || 0);
+                if (qty <= 0) return;
+                receivedRows.push({
+                  tanggalLo: lo.tanggal_lo || '',
+                  spbu: so.spbu || 'Tanpa SPBU',
+                  produk: product.product_name || '',
+                  quantity: qty
+                });
+              });
+            });
+          });
+
+          const receivedBySPBU = {};
+          receivedRows.forEach(r => {
+            (receivedBySPBU[r.spbu] || (receivedBySPBU[r.spbu] = [])).push(r);
+          });
+
+          function receivedProductSummary(list) {
+            const totals = {};
+            list.forEach(r => {
+              const nama = r.produk || 'Produk Lain';
+              totals[nama] = (totals[nama] || 0) + Number(r.quantity || 0);
+            });
+
+            return orderedProductNames(totals)
+              .map(nama => `${escapeHtml(nama)}: <b>${totals[nama]} KL</b>`)
+              .join(' &nbsp; | &nbsp; ') || '<span style="color:#94a3b8">Tidak ada</span>';
+          }
+
           const totalProduk = {};
           data.forEach(r => {
             const nama = r.produk || 'Produk Lain';
@@ -2177,6 +2217,10 @@ body.app-tab-dashboard .floating-nav-addon {
             ? `${formatDate(oldDates[0])} s/d ${formatDate(twoDaysAgoKey)}`
             : 'tidak ada';
 
+          const receivedForSPBU = receivedBySPBU[n] || [];
+          const receivedToday = receivedForSPBU.filter(r => String(r.tanggalLo).slice(0, 10) === todayKey);
+          const receivedYesterday = receivedForSPBU.filter(r => String(r.tanggalLo).slice(0, 10) === yesterdayKey);
+
           content += `<div class="resume-card">
             <div class="resume-head ${shade}">${escapeHtml(n)}</div>
             <div class="resume-mobile-list">`;
@@ -2196,7 +2240,15 @@ body.app-tab-dashboard .floating-nav-addon {
             </div>`;
           });
 
-          content += `<div class="resume-total" style="margin:6px 0 0;padding:9px 2px;border-top:1px solid #e2e8f0;">
+          content += `
+            <div class="tertinggal-received">
+              <div class="tertinggal-received-title">STOK YANG SUDAH DITERIMA :</div>
+              <div class="tertinggal-received-lines">
+                <div><b>Hari ini (sampai saat ini):</b> ${receivedProductSummary(receivedToday)}</div>
+                <div><b>Kemarin:</b> ${receivedProductSummary(receivedYesterday)}</div>
+              </div>
+            </div>
+            <div class="resume-total" style="margin:6px 0 0;padding:9px 2px;border-top:1px solid #e2e8f0;">
               <div class="tertinggal-total-title">TOTAL STOK BELUM DITERIMA :</div>
               <div class="tertinggal-product-list">${productDetails || '<span style="color:#94a3b8">Tidak ada</span>'}</div>
               <div style="display:grid;gap:5px;font-size:.69rem;font-weight:500;color:#475569;line-height:1.4;margin-top:7px;">
