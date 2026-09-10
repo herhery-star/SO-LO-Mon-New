@@ -2148,7 +2148,7 @@ body.app-tab-dashboard .floating-nav-addon {
               .join(' &nbsp; | &nbsp; ') || '<span style="color:#94a3b8">Tidak ada</span>';
           }
 
-          // STOK YANG SUDAH DITERIMA dihitung dari tanggal LO dan quantity LO.
+          // STOK YANG TERKIRIM dihitung dari tanggal LO dan quantity LO.
           // Hanya LO aktif yang dihitung; LO dengan deleted_at tidak disertakan.
           const receivedRows = [];
           (resumeSOData || []).forEach(so => {
@@ -2242,14 +2242,14 @@ body.app-tab-dashboard .floating-nav-addon {
 
           content += `
             <div class="tertinggal-received">
-              <div class="tertinggal-received-title">STOK YANG SUDAH DITERIMA :</div>
+              <div class="tertinggal-received-title">STOK YANG TERKIRIM :</div>
               <div class="tertinggal-received-lines">
                 <div><b>Hari ini (sampai saat ini):</b> ${receivedProductSummary(receivedToday)}</div>
                 <div><b>Kemarin:</b> ${receivedProductSummary(receivedYesterday)}</div>
               </div>
             </div>
             <div class="resume-total" style="margin:6px 0 0;padding:9px 2px;border-top:1px solid #e2e8f0;">
-              <div class="tertinggal-total-title">TOTAL STOK BELUM DITERIMA :</div>
+              <div class="tertinggal-total-title">TOTAL STOK BELUM TERKIRIM :</div>
               <div class="tertinggal-product-list">${productDetails || '<span style="color:#94a3b8">Tidak ada</span>'}</div>
               <div style="display:grid;gap:5px;font-size:.69rem;font-weight:500;color:#475569;line-height:1.4;margin-top:7px;">
                 <div><b>Hari ini:</b> ${productSummary(pembelianHariIni)}</div>
