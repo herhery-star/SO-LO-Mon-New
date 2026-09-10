@@ -1166,8 +1166,8 @@
 .tertinggal-received-lines{display:grid;gap:5px;font-size:.69rem;font-weight:500;color:#475569;line-height:1.4}
 .tertinggal-received-lines b{color:#166534}
 .app-tab{display:none}.app-tab.active{display:block}.app-tab.active:not(#loTabPage) .so-lock-panel,.app-tab.active:not(#loTabPage) #soInputCard{display:none !important}.app-tab.active#loTabPage:not(.show-editor-so) .so-lock-panel,.app-tab.active#loTabPage:not(.show-editor-so) #soInputCard{display:none !important}/* V1: Editor + area Input SO/LO hanya terlihat pada Tab LO. */
-    body.app-tab-dashboard .editor-bar, body.app-tab-dashboard .top-control-row, body.app-tab-dashboard > .container > .grid, body.app-tab-tertinggal .editor-bar, body.app-tab-tertinggal .top-control-row, body.app-tab-tertinggal > .container > .grid { display:none !important; }
-    .app-tab-nav{position:fixed;left:0;right:0;bottom:0;z-index:10000;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid #cbd5e1;box-shadow:0 -4px 16px rgba(15,23,42,.10);backdrop-filter:blur(8px)}
+    body.app-tab-dashboard .editor-bar, body.app-tab-dashboard .top-control-row, body.app-tab-dashboard > .container > .grid, body.app-tab-tertinggal .editor-bar, body.app-tab-tertinggal .top-control-row, body.app-tab-tertinggal > .container > .grid, body.app-tab-search .editor-bar, body.app-tab-search .top-control-row, body.app-tab-search > .container > .grid { display:none !important; }
+    .app-tab-nav{position:fixed;left:0;right:0;bottom:0;z-index:10000;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid #cbd5e1;box-shadow:0 -4px 16px rgba(15,23,42,.10);backdrop-filter:blur(8px)}
 .app-tab-btn{min-width:0;min-height:48px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#334155;font-weight:800;font-size:.78rem;line-height:1.05;cursor:pointer}.app-tab-btn.active{background:#0f172a;color:#fff;border-color:#0f172a}.app-tab-btn small{display:block;font-size:.62rem;font-weight:600;margin-top:3px;opacity:.8}
 body{padding-bottom:82px}
 @media (min-width:801px){body{padding-bottom:92px}.app-tab-nav{left:50%;right:auto;transform:translateX(-50%);width:min(620px,calc(100% - 24px));border:1px solid #cbd5e1;border-radius:14px;bottom:12px}}
@@ -1426,6 +1426,60 @@ body.app-tab-dashboard .floating-nav-addon {
     }
 }
 
+
+
+/* =========================================================
+   TAB 4 — PENCARIAN V1
+   Quick Search + layered criteria (AND)
+   ========================================================= */
+.search-page{display:none}.search-page.active{display:block}
+.search-panel{background:#fff;border:1px solid #dbe3ec;border-radius:14px;padding:16px;box-shadow:0 2px 8px rgba(15,23,42,.05);margin-bottom:16px}
+.search-quick-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.search-quick-row input{min-height:48px;font-size:1rem;border:2px solid #94a3b8;background:#f8fafc}
+.search-quick-row input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.10);background:#fff}
+.search-btn{width:auto!important;min-width:100px;min-height:48px;padding:9px 16px!important;border-radius:9px!important;background:#2563eb}
+.search-divider{height:1px;background:#e2e8f0;margin:15px 0 12px}
+.search-criteria-title{font-weight:800;color:#334155;font-size:.9rem;margin-bottom:8px}
+.search-criteria{display:grid;gap:7px}
+.search-criterion{display:grid;grid-template-columns:18px 150px minmax(0,1fr) 36px;gap:7px;align-items:center}
+.search-bullet{font-size:1.05rem;color:#64748b;text-align:center}
+.search-criterion select,.search-criterion input{min-height:40px;padding:7px 9px;font-size:.88rem}
+.search-criterion .search-value-wrap{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.search-criterion .search-value-wrap.single{grid-template-columns:1fr}
+
+.search-product-multi{grid-column:3;min-width:0;width:100%;box-sizing:border-box;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(38px,auto));gap:6px;padding:6px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px}
+.search-product-option{box-sizing:border-box;display:flex!important;align-items:center;justify-content:flex-start;gap:7px;min-width:0;width:100%;min-height:38px;padding:6px 9px;border:1px solid #dbe3ec;border-radius:7px;background:#fff;font-size:.78rem;font-weight:700;color:#334155;cursor:pointer;white-space:nowrap;overflow:hidden;margin:0}
+.search-product-option:hover{background:#f1f5f9}
+.search-product-option input{width:16px!important;height:16px!important;min-width:16px!important;min-height:16px!important;padding:0!important;margin:0!important;flex:0 0 16px;accent-color:#2563eb}
+.search-product-option span{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search-product-all{background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a}
+@media(max-width:640px){.search-product-multi{grid-column:2;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(38px,auto));}}
+.search-remove{width:36px!important;min-width:36px!important;height:36px;padding:0!important;border-radius:8px!important;background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;font-size:1rem}
+.search-remove:hover{background:#fee2e2;color:#b91c1c}
+.search-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.search-add{width:auto!important;background:#475569;min-height:40px;padding:8px 12px!important}
+.search-clear{width:auto!important;background:#e2e8f0;color:#334155;min-height:40px;padding:8px 12px!important}
+.search-result-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 10px;flex-wrap:wrap}
+.search-result-count{font-weight:800;color:#0f172a}
+.search-active-filters{font-size:.78rem;color:#64748b}
+.search-results .so-card{margin-bottom:12px}
+.search-match-mark{background:#fef3c7;border-radius:3px;padding:0 2px}
+.search-empty{padding:22px;text-align:center;color:#64748b;border:1px dashed #cbd5e1;border-radius:12px;background:#fff}
+.search-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:12px}
+.search-stat{padding:9px;border:1px solid #dbe3ec;border-radius:10px;background:#fff;font-size:.72rem;color:#64748b}
+.search-stat b{display:block;color:#0f172a;font-size:1rem;margin-top:3px}
+@media(max-width:640px){
+ .search-panel{padding:12px}
+ .search-quick-row{grid-template-columns:1fr}
+ .search-btn{width:100%!important}
+ .search-criterion{grid-template-columns:14px minmax(0,1fr) 34px;gap:6px}
+ .search-criterion select{grid-column:2}
+ .search-criterion .search-value-wrap{grid-column:2;grid-row:3}
+ .search-remove{grid-column:3;grid-row:1 / span 2}
+ .search-mode-note{width:100%;margin-left:0}
+ .search-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
 </style>
 
 </head>
@@ -1629,6 +1683,37 @@ body.app-tab-dashboard .floating-nav-addon {
     </div>
     </div><!-- /resumeDashboardPage -->
 
+
+
+    <!-- TAB 4: PENCARIAN -->
+    <div id="searchPage" class="app-tab search-page">
+        <h2>🔎 Pencarian Data SO–LO</h2>
+        <div class="search-panel">
+            <div class="search-quick-row">
+                <input type="search" id="quickSearchInput" placeholder="Quick Search: Nomor SO, Nomor LO, Produk, SPBU, atau kata kunci..." autocomplete="off">
+                <button type="button" id="quickSearchBtn" class="search-btn">🔎 Cari</button>
+            </div>
+
+            <div class="search-divider"></div>
+            <div class="search-criteria-title">Kriteria pencarian berlapis</div>
+            <div id="searchCriteria" class="search-criteria"></div>
+
+            <div class="search-actions">
+                <button type="button" id="addSearchCriterionBtn" class="search-add">＋ Tambah Kriteria</button>
+                <button type="button" id="clearSearchBtn" class="search-clear">↺ Bersihkan</button>
+                <span class="search-mode-note" style="font-size:.78rem;color:#64748b;width:100%">Semua kriteria menggunakan logika AND. Filter Produk dapat memilih lebih dari satu produk.</span>
+            </div>
+        </div>
+
+        <div class="search-result-head">
+            <div id="searchResultCount" class="search-result-count">Belum ada pencarian.</div>
+            <div id="searchActiveFilters" class="search-active-filters"></div>
+        </div>
+        <div id="searchResults" class="search-results">
+            <div class="search-empty">Gunakan Quick Search atau pilih kriteria di atas, lalu klik <strong>Cari</strong>.</div>
+        </div>
+    </div>
+
     <!-- TAB 3: TERTINGGAL -->
     <div id="resumeBBMPage" class="app-tab resume-page">
       <h2>Resume BBM Tertinggal</h2>
@@ -1639,6 +1724,7 @@ body.app-tab-dashboard .floating-nav-addon {
       <button type="button" class="app-tab-btn active" data-app-tab="lo">📋 LO<small>Input Loading Order</small></button>
       <button type="button" class="app-tab-btn" data-app-tab="dashboard">📊 Dashboard<small>Monitoring</small></button>
       <button type="button" class="app-tab-btn" data-app-tab="tertinggal">⚠️ Tertinggal<small>Belum Terkirim</small></button>
+      <button type="button" class="app-tab-btn" data-app-tab="search">🔎 Cari<small>Pencarian</small></button>
     </nav>
 
 <!-- EDITOR / PIN MODAL -->
@@ -2242,7 +2328,7 @@ body.app-tab-dashboard .floating-nav-addon {
 
           content += `
             <div class="tertinggal-received">
-              <div class="tertinggal-received-title">STOK YANG TERKIRIM : </div>
+              <div class="tertinggal-received-title">STOK YANG TERKIRIM :</div>
               <div class="tertinggal-received-lines">
                 <div><b>Hari ini (sampai saat ini):</b> ${receivedProductSummary(receivedToday)}</div>
                 <div><b>Kemarin:</b> ${receivedProductSummary(receivedYesterday)}</div>
@@ -3313,16 +3399,16 @@ body.app-tab-dashboard .floating-nav-addon {
         initSOPickerControls();
     }
 
-    // V1: navigasi 3 tab utama — UI only, data/Supabase logic tetap sama.
+    // V1: navigasi 4 tab utama — UI only, data/Supabase logic tetap sama.
     function setAppTab(tab) {
-        // Sinkronkan area global agar Editor + Input SO/LO hanya muncul pada Tab LO.
-        document.body.classList.remove('app-tab-lo', 'app-tab-dashboard', 'app-tab-tertinggal');
+        document.body.classList.remove('app-tab-lo', 'app-tab-dashboard', 'app-tab-tertinggal', 'app-tab-search');
         document.body.classList.add(`app-tab-${tab}`);
 
         const pages = {
             lo: document.getElementById('loTabPage'),
             dashboard: document.getElementById('resumeDashboardPage'),
-            tertinggal: document.getElementById('resumeBBMPage')
+            tertinggal: document.getElementById('resumeBBMPage'),
+            search: document.getElementById('searchPage')
         };
         Object.entries(pages).forEach(([key, el]) => {
             if (el) el.classList.toggle('active', key === tab);
@@ -3331,13 +3417,310 @@ body.app-tab-dashboard .floating-nav-addon {
             btn.classList.toggle('active', btn.dataset.appTab === tab);
         });
         if (tab === 'tertinggal') renderResumeBBM();
+        if (tab === 'search') renderSearchResults(false);
         window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    // =========================
+    // PENCARIAN V1 — QUICK + KRITERIA BERLAPIS
+    // =========================
+    const SEARCH_CATEGORY_LABELS = {
+        nomor_so: 'Nomor SO',
+        nomor_lo: 'Nomor LO',
+        spbu: 'SPBU',
+        produk: 'Produk',
+        tanggal_so: 'Tanggal SO',
+        tanggal_lo: 'Tanggal LO',
+        status_so: 'Status SO',
+        status_pengiriman: 'Status Pengiriman',
+        quantity_so: 'Quantity SO',
+        quantity_lo: 'Quantity LO',
+        sisa: 'Sisa BBM'
+    };
+
+    let searchCriteriaState = [];
+    let searchHasRun = false;
+
+    function getSearchRows() {
+        const rows = [];
+        (resumeSOData || []).forEach(so => {
+            const products = so.so_products || [];
+            if (!products.length) {
+                rows.push({ so, product:null, lo:null });
+                return;
+            }
+            products.forEach(product => {
+                const activeLOs = (product.lo || []).filter(lo => !lo.deleted_at);
+                const loRows = activeLOs.length ? activeLOs : [null];
+                loRows.forEach(lo => rows.push({ so, product, lo }));
+            });
+        });
+        return rows;
+    }
+
+    function normalizeSearch(v) {
+        return String(v ?? '').toLowerCase().trim();
+    }
+
+    function searchRowText(row) {
+        const so = row.so || {}, p = row.product || {}, lo = row.lo || {};
+        const totalLO = row.product
+            ? (row.product.lo || []).filter(x => !x.deleted_at).reduce((s,x) => s + Number(x.quantity_lo || 0), 0)
+            : 0;
+        const soQty = Number(p.quantity_so || 0);
+        const sisa = Math.max(0, soQty - totalLO);
+        return [
+            so.nomor_so, so.tanggal_so, formatDate(so.tanggal_so), so.spbu,
+            p.product_name, p.quantity_so,
+            lo.nomor_lo, lo.tanggal_lo, formatDate(lo.tanggal_lo), lo.quantity_lo,
+            so.completed_at ? 'selesai' : 'aktif',
+            totalLO === 0 ? 'belum terkirim' : totalLO < soQty ? 'tersisa' : 'selesai',
+            sisa
+        ].filter(v => v !== null && v !== undefined).join(' | ');
+    }
+
+    function criterionMatches(row, criterion) {
+        const type = criterion.type;
+        const value = criterion.value || {};
+        const so = row.so || {}, p = row.product || {}, lo = row.lo || {};
+        const totalLO = row.product
+            ? (row.product.lo || []).filter(x => !x.deleted_at).reduce((s,x) => s + Number(x.quantity_lo || 0), 0)
+            : 0;
+        const soQty = Number(p.quantity_so || 0);
+        const qtyLO = Number(lo.quantity_lo || 0);
+        const sisa = Math.max(0, soQty - totalLO);
+
+        switch(type) {
+            case 'nomor_so': return normalizeSearch(so.nomor_so).includes(normalizeSearch(value.text));
+            case 'nomor_lo': return !!row.lo && normalizeSearch(lo.nomor_lo).includes(normalizeSearch(value.text));
+            case 'spbu': return normalizeSearch(so.spbu) === normalizeSearch(value.select);
+            case 'produk': {
+                const selected = Array.isArray(value.select) ? value.select : (value.select ? [value.select] : []);
+                return selected.length > 0 && selected.some(name => normalizeSearch(p.product_name) === normalizeSearch(name));
+            }
+            case 'tanggal_so': return String(so.tanggal_so || '').slice(0,10) >= (value.from || '0000-00-00') && String(so.tanggal_so || '').slice(0,10) <= (value.to || '9999-12-31');
+            case 'tanggal_lo': {
+                if (!row.lo) return false;
+                const d = String(lo.tanggal_lo || '').slice(0,10);
+                return d >= (value.from || '0000-00-00') && d <= (value.to || '9999-12-31');
+            }
+            case 'status_so': return (so.completed_at ? 'selesai' : 'aktif') === value.select;
+            case 'status_pengiriman': {
+                const status = totalLO === 0 ? 'belum' : totalLO < soQty ? 'tersisa' : 'selesai';
+                return status === value.select;
+            }
+            case 'quantity_so': return compareNumber(soQty, value.op, value.number);
+            case 'quantity_lo': return !!row.lo && compareNumber(qtyLO, value.op, value.number);
+            case 'sisa': return compareNumber(sisa, value.op, value.number);
+            default: return true;
+        }
+    }
+
+    function compareNumber(actual, op, target) {
+        const n = Number(target);
+        if (!Number.isFinite(n)) return false;
+        switch(op) {
+            case 'eq': return actual === n;
+            case 'gte': return actual >= n;
+            case 'lte': return actual <= n;
+            case 'gt': return actual > n;
+            case 'lt': return actual < n;
+            default: return true;
+        }
+    }
+
+    function searchValueHtml(c, index) {
+        const t = c.type;
+        if (['nomor_so','nomor_lo'].includes(t)) return `<div class="search-value-wrap single"><input type="text" data-search-field="text" value="${escapeHtml(c.value.text || '')}" placeholder="Masukkan ${escapeHtml(SEARCH_CATEGORY_LABELS[t])}"></div>`;
+        if (t === 'produk') {
+            const products = ['Pertalite','Biosolar','Pertamax','Dexlite','PX Turbo'];
+            const selected = Array.isArray(c.value.select) ? c.value.select : (c.value.select ? [c.value.select] : []);
+            const allSelected = selected.length === products.length;
+            return `<div class="search-product-multi">
+                <label class="search-product-option search-product-all"><input type="checkbox" data-search-field="select" value="__ALL__" ${allSelected ? 'checked' : ''}><span>Semua Produk</span></label>
+                ${products.map(x => `<label class="search-product-option"><input type="checkbox" data-search-field="select" value="${x}" ${selected.includes(x) ? 'checked' : ''}><span>${x}</span></label>`).join('')}
+            </div>`;
+        }
+        if (['spbu','status_so','status_pengiriman'].includes(t)) {
+            let opts = '';
+            if (t === 'spbu') opts = ['SPBU-74.906.07','SPBU-74.906.16'].map(x=>`<option value="${x}" ${c.value.select===x?'selected':''}>${x}</option>`).join('');
+            if (t === 'status_so') opts = '<option value="aktif">Aktif</option><option value="selesai">Selesai</option>';
+            if (t === 'status_pengiriman') opts = '<option value="belum">Belum Terkirim</option><option value="tersisa">Tersisa</option><option value="selesai">Selesai</option>';
+            return `<div class="search-value-wrap single"><select data-search-field="select">${opts}</select></div>`;
+        }
+        if (['tanggal_so','tanggal_lo'].includes(t)) return `<div class="search-value-wrap"><input type="date" data-search-field="from" value="${escapeHtml(c.value.from || '')}" title="Dari"><input type="date" data-search-field="to" value="${escapeHtml(c.value.to || '')}" title="Sampai"></div>`;
+        if (['quantity_so','quantity_lo','sisa'].includes(t)) return `<div class="search-value-wrap"><select data-search-field="op"><option value="eq" ${c.value.op==='eq'?'selected':''}>=</option><option value="gte" ${c.value.op==='gte'?'selected':''}>≥</option><option value="lte" ${c.value.op==='lte'?'selected':''}>≤</option><option value="gt" ${c.value.op==='gt'?'selected':''}>&gt;</option><option value="lt" ${c.value.op==='lt'?'selected':''}>&lt;</option></select><input type="number" step="0.1" data-search-field="number" value="${escapeHtml(c.value.number ?? '')}" placeholder="KL"></div>`;
+        return '<div></div>';
+    }
+
+    function renderSearchCriteria() {
+        const wrap = document.getElementById('searchCriteria');
+        if (!wrap) return;
+        wrap.innerHTML = searchCriteriaState.map((c,i) => `
+            <div class="search-criterion" data-criterion-index="${i}">
+                <span class="search-bullet">●</span>
+                <select data-search-field="type" aria-label="Jenis kriteria">
+                    <option value="" ${!c.type?'selected':''}>Pilih Kriteria</option>
+                    ${Object.entries(SEARCH_CATEGORY_LABELS).map(([k,label])=>`<option value="${k}" ${c.type===k?'selected':''}>${label}</option>`).join('')}
+                </select>
+                ${searchValueHtml(c,i)}
+                <button type="button" class="search-remove" data-remove-criterion="${i}" title="Hapus kriteria">×</button>
+            </div>`).join('');
+    }
+
+    function syncSearchCriteriaFromDom() {
+        document.querySelectorAll('.search-criterion').forEach(el => {
+            const i = Number(el.dataset.criterionIndex);
+            const type = el.querySelector('[data-search-field="type"]')?.value || '';
+            const value = {};
+            if (type === 'produk') {
+                const checked = [...el.querySelectorAll('input[type="checkbox"][data-search-field="select"]:checked')].map(x => x.value);
+                const products = ['Pertalite','Biosolar','Pertamax','Dexlite','PX Turbo'];
+                value.select = checked.includes('__ALL__') ? products : checked;
+            } else {
+                el.querySelectorAll('[data-search-field]').forEach(input => {
+                    const field = input.dataset.searchField;
+                    if (field !== 'type') value[field] = input.value;
+                });
+            }
+            searchCriteriaState[i] = { type, value };
+        });
+    }
+
+    function addSearchCriterion(type='') {
+        searchCriteriaState.push({ type, value:{} });
+        renderSearchCriteria();
+    }
+
+    function clearSearchForm() {
+        document.getElementById('quickSearchInput').value = '';
+        searchCriteriaState = [];
+        renderSearchCriteria();
+        searchHasRun = false;
+        document.getElementById('searchResultCount').textContent = 'Belum ada pencarian.';
+        document.getElementById('searchActiveFilters').textContent = '';
+        document.getElementById('searchResults').innerHTML = '<div class="search-empty">Gunakan Quick Search atau pilih kriteria di atas, lalu klik <strong>Cari</strong>.</div>';
+    }
+
+    function getSearchFiltersSummary(quick, criteria) {
+        const parts = [];
+        if (quick) parts.push(`Quick: “${quick}”`);
+        criteria.forEach(c => {
+            const label = SEARCH_CATEGORY_LABELS[c.type] || c.type;
+            const v = c.value || {};
+            let text = '';
+            if (v.text) text = v.text;
+            else if (Array.isArray(v.select)) text = v.select.length === 5 ? 'Semua Produk' : v.select.join(', ');
+            else if (v.select) text = v.select;
+            else if (v.from || v.to) text = `${v.from || 'awal'} s/d ${v.to || 'akhir'}`;
+            else if (v.number !== undefined && v.number !== '') text = `${({eq:'=',gte:'≥',lte:'≤',gt:'>',lt:'<'}[v.op]||'=')} ${v.number} KL`;
+            if (text) parts.push(`${label}: ${text}`);
+        });
+        return parts.join(' · ');
+    }
+
+    function renderSearchResults(execute=true) {
+        if (execute) searchHasRun = true;
+        if (!searchHasRun) return;
+        syncSearchCriteriaFromDom();
+        const quick = normalizeSearch(document.getElementById('quickSearchInput')?.value || '');
+        const criteria = searchCriteriaState.filter(c => {
+            const v=c.value||{};
+            if (['nomor_so','nomor_lo'].includes(c.type)) return normalizeSearch(v.text);
+            if (c.type === 'produk') return Array.isArray(v.select) ? v.select.length > 0 : !!v.select;
+            if (['spbu','status_so','status_pengiriman'].includes(c.type)) return normalizeSearch(v.select);
+            if (['tanggal_so','tanggal_lo'].includes(c.type)) return v.from || v.to;
+            if (['quantity_so','quantity_lo','sisa'].includes(c.type)) return v.number !== undefined && v.number !== '';
+            return false;
+        });
+        const rows = getSearchRows().filter(row => {
+            const quickMatch = !quick || normalizeSearch(searchRowText(row)).includes(quick);
+            if (!quickMatch) return false;
+            if (!criteria.length) return true;
+            const matches = criteria.map(c => criterionMatches(row, c));
+            return matches.every(Boolean);
+        });
+        const grouped = new Map();
+        rows.forEach(row => {
+            const soId = row.so?.id || row.so?.nomor_so || Math.random();
+            if (!grouped.has(soId)) grouped.set(soId,{so:row.so, products:new Map()});
+            const g=grouped.get(soId);
+            if (row.product) {
+                const pid=row.product.id || row.product.product_name;
+                if (!g.products.has(pid)) g.products.set(pid,{product:row.product,los:[]});
+                if (row.lo) g.products.get(pid).los.push(row.lo);
+            }
+        });
+        const resultTarget=document.getElementById('searchResults');
+        const countTarget=document.getElementById('searchResultCount');
+        const filterTarget=document.getElementById('searchActiveFilters');
+        countTarget.textContent=`${grouped.size} SO ditemukan · ${rows.length} baris cocok`;
+        filterTarget.textContent=getSearchFiltersSummary(quick,criteria) || 'Tanpa filter';
+        if (!grouped.size) { resultTarget.innerHTML='<div class="search-empty">Tidak ada data yang sesuai dengan pencarian.</div>'; return; }
+
+        let html='';
+        grouped.forEach(g=>{
+            const so=g.so||{};
+            const shade=so.spbu==='SPBU-74.906.16'?' spbu-green':so.spbu==='SPBU-74.906.07'?' spbu-blue':'';
+            html+=`<div class="so-card${shade}"><div class="so-header"><div class="so-header-left"><span>SO: ${escapeHtml(so.nomor_so||'')}</span>${so.spbu?`<span class="spbu-badge">${escapeHtml(so.spbu)}</span>`:''}</div><span style="font-size:.85rem;color:#64748b;font-weight:600">${formatDate(so.tanggal_so)}</span></div>`;
+            g.products.forEach(pg=>{
+                const p=pg.product; const activeLOs=(p.lo||[]).filter(lo=>!lo.deleted_at); const totalLO=activeLOs.reduce((sum,lo)=>sum+Number(lo.quantity_lo||0),0); const sisa=Number(p.quantity_so||0)-totalLO;
+                let status=totalLO===0?'<span class="status-badge status-belum">Belum Terkirim</span>':totalLO<Number(p.quantity_so)?`<span class="status-badge status-tersisa">Sisa ${sisa} KL</span>`:'<span class="status-badge status-selesai">Selesai</span>';
+                html+=`<div class="product-row"><strong>${escapeHtml(p.product_name||'')} — ${Number(p.quantity_so||0)} KL</strong><div style="margin-top:4px">Terkirim ${totalLO}/${Number(p.quantity_so||0)} KL ${status}</div>`;
+                const los=pg.los.length?pg.los:[];
+                los.forEach(lo=>{html+=`<div class="lo-item"><span>LO ${escapeHtml(lo.nomor_lo||'')} (${formatDate(lo.tanggal_lo)}) : ${Number(lo.quantity_lo||0)} KL</span></div>`;});
+                html+='</div>';
+            });
+            html+='</div>';
+        });
+        resultTarget.innerHTML=html;
+    }
+
+    function initSearchV1() {
+        const criteria=document.getElementById('searchCriteria');
+        if (!criteria) return;
+        addSearchCriterion('');
+        document.getElementById('addSearchCriterionBtn')?.addEventListener('click',()=>addSearchCriterion(''));
+        document.getElementById('clearSearchBtn')?.addEventListener('click',clearSearchForm);
+        document.getElementById('quickSearchBtn')?.addEventListener('click',()=>renderSearchResults(true));
+        document.getElementById('quickSearchInput')?.addEventListener('keydown',e=>{if(e.key==='Enter') renderSearchResults(true);});
+        criteria.addEventListener('change',e=>{
+            const row=e.target.closest('.search-criterion');
+            if (e.target.dataset.searchField==='type' && row) {
+                const i=Number(row.dataset.criterionIndex);
+                searchCriteriaState[i]={type:e.target.value,value:{}};
+                renderSearchCriteria();
+            }
+        });
+        criteria.addEventListener('input',e=>{ if(e.target.dataset.searchField && e.target.dataset.searchField!=='type') syncSearchCriteriaFromDom(); });
+        criteria.addEventListener('change',e=>{
+            if (e.target.dataset.searchField === 'select' && e.target.type === 'checkbox') {
+                const row = e.target.closest('.search-criterion');
+                if (row) {
+                    const boxes = [...row.querySelectorAll('input[type=checkbox][data-search-field=select]')];
+                    const all = boxes.find(x => x.value === '__ALL__');
+                    const products = boxes.filter(x => x.value !== '__ALL__');
+                    if (e.target.value === '__ALL__') products.forEach(x => x.checked = all.checked);
+                    else if (all) all.checked = products.every(x => x.checked);
+                    syncSearchCriteriaFromDom();
+                    if (searchHasRun) renderSearchResults(true);
+                }
+            }
+        });
+        criteria.addEventListener('click',e=>{
+            const btn=e.target.closest('[data-remove-criterion]');
+            if(!btn) return;
+            searchCriteriaState.splice(Number(btn.dataset.removeCriterion),1);
+            renderSearchCriteria();
+            if(searchHasRun) renderSearchResults(true);
+        });
     }
 
     window.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.app-tab-btn').forEach(btn => {
             btn.addEventListener('click', () => setAppTab(btn.dataset.appTab));
         });
+        initSearchV1();
         // Mulai dari workflow operasional: Input LO.
         setAppTab('lo');
     });
