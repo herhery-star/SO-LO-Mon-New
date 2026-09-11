@@ -1635,15 +1635,23 @@ body.app-tab-dashboard .floating-nav-addon {
             <form id="formSO">
                 <div class="form-group">
                     <label for="so_number">Nomor SO</label>
-                    <input type="text" id="so_number" required placeholder="Masukkan Nomor SO">
+                    <input type="text" id="so_number" required placeholder="Masukkan Nomor SO" inputmode="numeric" autocomplete="off" aria-describedby="soNumberWarning">
+                    <small id="soNumberWarning" class="so-number-warning" role="alert" aria-live="polite"></small>
                 </div>
 
                 <div class="form-group">
-                    <label for="so_spbu">SPBU</label>
-                    <select id="so_spbu" required>
-                        <option value="SPBU-74.906.16">SPBU-74.906.16</option>
-                        <option value="SPBU-74.906.07">SPBU-74.906.07</option>
-                    </select>
+                    <label>Pilih SPBU</label>
+                    <div class="so-spbu-selector" id="soSPBUSelector" role="radiogroup" aria-label="Pilih SPBU untuk Sales Order">
+                        <label class="so-spbu-option spbu-green">
+                            <input type="radio" name="so_spbu" value="SPBU-74.906.16" required>
+                            <span>SPBU-74.906.16</span>
+                        </label>
+                        <label class="so-spbu-option spbu-blue">
+                            <input type="radio" name="so_spbu" value="SPBU-74.906.07">
+                            <span>SPBU-74.906.07</span>
+                        </label>
+                    </div>
+                    <div class="so-spbu-hint">Pilih SPBU terlebih dahulu.</div>
                 </div>
 
                 <div class="form-group">
@@ -2785,8 +2793,16 @@ body.app-tab-dashboard .floating-nav-addon {
         if (!sb) { alert("Koneksi Supabase belum siap."); return; }
 
         const nomor_so = document.getElementById('so_number').value.trim();
+        if (!validateSONumber10Digit(nomor_so, true)) return;
+
         const tanggal_so = document.getElementById('so_date').value;
-        const spbu = document.getElementById('so_spbu').value;
+        const spbuRadio = document.querySelector('input[name="so_spbu"]:checked');
+        const spbu = spbuRadio?.value || '';
+
+        if (!spbu) {
+            alert('Pilih SPBU terlebih dahulu.');
+            return;
+        }
 
         const selectedProducts = [];
 
@@ -2833,9 +2849,56 @@ body.app-tab-dashboard .floating-nav-addon {
 
         alert('SO berhasil disimpan.');
         document.getElementById('formSO').reset();
+        document.querySelectorAll('input[name="so_spbu"]').forEach(r => r.checked = false);
+        validateSONumber10Digit('', false);
         setDefaultDates();
         await fetchDashboard();
     });
+
+    // =========================
+    // VALIDASI NOMOR SO — TEPAT 10 DIGIT
+    // Mengikuti pola validasi Nomor LO.
+    // =========================
+    function validateSONumber10Digit(value, showWarning = true) {
+        const input = document.getElementById('so_number');
+        const warning = document.getElementById('soNumberWarning');
+        const raw = String(value ?? '').trim();
+        const digitCount = (raw.match(/\d/g) || []).length;
+        let message = '';
+        let valid = true;
+
+        if (!raw) {
+            message = 'Nomor SO wajib diisi.';
+            valid = false;
+        } else if (!/^\d+$/.test(raw)) {
+            message = 'Nomor SO hanya boleh berisi angka.';
+            valid = false;
+        } else if (digitCount < 10) {
+            message = `Nomor SO harus tepat 10 digit. Saat ini baru ${digitCount} digit.`;
+            valid = false;
+        } else if (digitCount > 10) {
+            message = `Nomor SO harus tepat 10 digit. Saat ini ${digitCount} digit.`;
+            valid = false;
+        }
+
+        if (input && warning) {
+            input.classList.toggle('so-number-invalid', !valid);
+            warning.textContent = message;
+            warning.classList.toggle('show', showWarning && !valid);
+        }
+
+        return valid;
+    }
+
+    const soNumberInput = document.getElementById('so_number');
+    if (soNumberInput) {
+        soNumberInput.addEventListener('input', () => {
+            validateSONumber10Digit(soNumberInput.value, true);
+        });
+        soNumberInput.addEventListener('blur', () => {
+            validateSONumber10Digit(soNumberInput.value, true);
+        });
+    }
 
     // =========================
     // VALIDASI NOMOR LO — TEPAT 10 DIGIT
