@@ -75,6 +75,101 @@
 
         button:hover { opacity: .92; }
 
+        /* =========================================================
+           INPUT SO — PILIH SPBU
+           Pola visual mengikuti referensi:
+           kotak kecil di kiri + teks tebal, dua pilihan sejajar.
+           Kotak berubah warna sesuai SPBU saat dipilih.
+        ========================================================= */
+        .so-spbu-selector {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 56px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .so-spbu-option {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            width: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 1.15rem !important;
+            font-weight: 800 !important;
+            line-height: 1.2;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .so-spbu-option input[type="radio"] {
+            appearance: none;
+            -webkit-appearance: none;
+            flex: 0 0 32px;
+            width: 32px !important;
+            height: 32px;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 3px solid #64748b;
+            border-radius: 2px;
+            background: #fff;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .so-spbu-option input[type="radio"]::after {
+            content: "✓";
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            line-height: 1;
+            opacity: 0;
+            transform: scale(.7);
+            transition: opacity .12s ease, transform .12s ease;
+        }
+
+        .so-spbu-option.spbu-blue input[type="radio"] {
+            border-color: #1e40af;
+        }
+
+        .so-spbu-option.spbu-green input[type="radio"] {
+            border-color: #15803d;
+        }
+
+        .so-spbu-option.spbu-blue input[type="radio"]:checked {
+            background: #2563eb;
+            border-color: #1d4ed8;
+        }
+
+        .so-spbu-option.spbu-green input[type="radio"]:checked {
+            background: #16a34a;
+            border-color: #15803d;
+        }
+
+        .so-spbu-option input[type="radio"]:checked::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .so-spbu-option.spbu-blue:has(input:checked) span {
+            color: #1d4ed8;
+        }
+
+        .so-spbu-option.spbu-green:has(input:checked) span {
+            color: #15803d;
+        }
+
+        .so-spbu-hint {
+            margin-top: 8px;
+            color: #64748b;
+            font-size: .9rem;
+        }
+
         .product-choice {
             display: flex;
             align-items: center;
@@ -633,6 +728,42 @@
         }
 
         @media (max-width: 800px) {
+            .so-spbu-selector {
+                gap: 28px;
+            }
+
+            .so-spbu-option {
+                font-size: 1rem !important;
+            }
+
+            .so-spbu-option input[type="radio"] {
+                flex-basis: 30px;
+                width: 30px !important;
+                height: 30px;
+            }
+
+            @media (max-width: 430px) {
+                .so-spbu-selector {
+                    gap: 18px;
+                }
+
+                .so-spbu-option {
+                    gap: 8px;
+                    font-size: .92rem !important;
+                }
+
+                .so-spbu-option input[type="radio"] {
+                    flex-basis: 28px;
+                    width: 28px !important;
+                    height: 28px;
+                    border-width: 2px;
+                }
+
+                .so-spbu-option input[type="radio"]::after {
+                    font-size: 17px;
+                }
+            }
+
             body { padding: 12px; }
             .grid { grid-template-columns: 1fr; }
             .so-header { align-items: flex-start; flex-direction: column; }
@@ -1642,13 +1773,13 @@ body.app-tab-dashboard .floating-nav-addon {
                 <div class="form-group">
                     <label>Pilih SPBU</label>
                     <div class="so-spbu-selector" id="soSPBUSelector" role="radiogroup" aria-label="Pilih SPBU untuk Sales Order">
-                        <label class="so-spbu-option spbu-green">
-                            <input type="radio" name="so_spbu" value="SPBU-74.906.16" required>
-                            <span>SPBU-74.906.16</span>
-                        </label>
                         <label class="so-spbu-option spbu-blue">
-                            <input type="radio" name="so_spbu" value="SPBU-74.906.07">
+                            <input type="radio" name="so_spbu" value="SPBU-74.906.07" required>
                             <span>SPBU-74.906.07</span>
+                        </label>
+                        <label class="so-spbu-option spbu-green">
+                            <input type="radio" name="so_spbu" value="SPBU-74.906.16">
+                            <span>SPBU-74.906.16</span>
                         </label>
                     </div>
                     <div class="so-spbu-hint">Pilih SPBU terlebih dahulu.</div>
