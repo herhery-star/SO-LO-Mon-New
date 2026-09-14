@@ -546,6 +546,28 @@
         .btn-lock { background:#334155; }
         .btn-edit { width:auto; padding:5px 9px; background:#f59e0b; font-size:.78rem; white-space:nowrap; }
         .editor-only { display:none; }
+
+        /* Pencarian: tombol Edit memakai editor dan PIN yang sama dengan Dashboard. */
+        .search-edit-actions {
+            display:flex;
+            justify-content:flex-end;
+            gap:8px;
+            margin-top:10px;
+            padding-top:10px;
+            border-top:1px dashed var(--border);
+        }
+        .search-edit-btn { min-width:76px; }
+        .search-page .lo-item { max-width:none; }
+        .search-page .lo-item .search-edit-btn {
+            margin-left:auto;
+            flex:0 0 auto;
+        }
+        @media (max-width:640px) {
+            .search-page .lo-item { align-items:flex-start; }
+            .search-page .lo-item .search-edit-btn { margin-left:0; }
+            .search-edit-actions { justify-content:stretch; }
+            .search-edit-actions .search-edit-btn { width:100%; }
+        }
         body.editor-active .editor-only { display:inline-block; }
         .modal input, .modal select { margin-top:10px; }
         .modal small { display:block; margin-top:8px; color:#64748b; line-height:1.45; }
@@ -1403,7 +1425,15 @@
 .tertinggal-received-lines{display:grid;gap:5px;font-size:.69rem;font-weight:500;color:#475569;line-height:1.4}
 .tertinggal-received-lines b{color:#166534}
 .app-tab{display:none}.app-tab.active{display:block}.app-tab.active:not(#loTabPage) .so-lock-panel,.app-tab.active:not(#loTabPage) #soInputCard{display:none !important}.app-tab.active#loTabPage:not(.show-editor-so) .so-lock-panel,.app-tab.active#loTabPage:not(.show-editor-so) #soInputCard{display:none !important}/* V1: Editor + area Input SO/LO hanya terlihat pada Tab LO. */
-    body.app-tab-dashboard .editor-bar, body.app-tab-dashboard .top-control-row, body.app-tab-dashboard > .container > .grid, body.app-tab-tertinggal .editor-bar, body.app-tab-tertinggal .top-control-row, body.app-tab-tertinggal > .container > .grid, body.app-tab-search .editor-bar, body.app-tab-search .top-control-row, body.app-tab-search > .container > .grid { display:none !important; }
+    body.app-tab-dashboard .top-control-row, body.app-tab-dashboard > .container > .grid,
+body.app-tab-tertinggal .editor-bar, body.app-tab-tertinggal .top-control-row, body.app-tab-tertinggal > .container > .grid,
+body.app-tab-search .top-control-row, body.app-tab-search > .container > .grid { display:none !important; }
+
+body.app-tab-dashboard .editor-bar,
+body.app-tab-search .editor-bar {
+    display:flex !important;
+    margin-bottom:16px;
+}
     .app-tab-nav{position:fixed;left:0;right:0;bottom:0;z-index:10000;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid #cbd5e1;box-shadow:0 -4px 16px rgba(15,23,42,.10);backdrop-filter:blur(8px)}
 .app-tab-btn{min-width:0;min-height:48px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#334155;font-weight:800;font-size:.78rem;line-height:1.05;cursor:pointer}.app-tab-btn.active{background:#0f172a;color:#fff;border-color:#0f172a}.app-tab-btn small{display:block;font-size:.62rem;font-weight:600;margin-top:3px;opacity:.8}
 body{padding-bottom:82px}
@@ -4027,7 +4057,21 @@ body.app-tab-dashboard .floating-nav-addon {
                 let status=totalLO===0?'<span class="status-badge status-belum">Belum Terkirim</span>':totalLO<Number(p.quantity_so)?`<span class="status-badge status-tersisa">Sisa ${sisa} KL</span>`:'<span class="status-badge status-selesai">Selesai</span>';
                 html+=`<div class="product-row"><strong>${escapeHtml(p.product_name||'')} — ${Number(p.quantity_so||0)} KL</strong><div style="margin-top:4px">Terkirim ${totalLO}/${Number(p.quantity_so||0)} KL ${status}</div>`;
                 const los=pg.los.length?pg.los:[];
-                los.forEach(lo=>{html+=`<div class="lo-item"><span>LO ${escapeHtml(lo.nomor_lo||'')} (${formatDate(lo.tanggal_lo)}) : ${Number(lo.quantity_lo||0)} KL</span></div>`;});
+                los.forEach(lo=>{html+=`<div class="lo-item">
+                        <span>LO ${escapeHtml(lo.nomor_lo||'')} (${formatDate(lo.tanggal_lo)}) : ${Number(lo.quantity_lo||0)} KL</span>
+                        <button type="button"
+                                class="btn-edit editor-only search-edit-btn"
+                                onclick="openEditLO('${lo.id}', '${escapeJs(lo.nomor_lo||'')}', ${Number(lo.quantity_lo||0)}, '${escapeJs(lo.tanggal_lo||'')}')">
+                            Edit LO
+                        </button>
+                    </div>`;});
+                html+=`<div class="search-edit-actions">
+                    <button type="button"
+                            class="btn-edit editor-only search-edit-btn"
+                            onclick="openEditSO('${so.id}', '${escapeJs(so.nomor_so||'')}', '${escapeJs(so.tanggal_so||'')}', '${escapeJs(so.spbu||'')}')">
+                        Edit SO
+                    </button>
+                </div>`;
                 html+='</div>';
             });
             html+='</div>';
