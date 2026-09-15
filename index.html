@@ -1796,8 +1796,7 @@ body.app-tab-dashboard .floating-nav-addon {
             <form id="formSO">
                 <div class="form-group">
                     <label for="so_number">Nomor SO</label>
-                    <input type="text" id="so_number" required placeholder="Masukkan Nomor SO" inputmode="numeric" autocomplete="off" aria-describedby="soNumberWarning">
-                    <small id="soNumberWarning" class="so-number-warning" role="alert" aria-live="polite"></small>
+                    <input type="text" id="so_number" required placeholder="Masukkan Nomor SO" autocomplete="off">
                 </div>
 
                 <div class="form-group">
@@ -2954,7 +2953,30 @@ body.app-tab-dashboard .floating-nav-addon {
         if (!sb) { alert("Koneksi Supabase belum siap."); return; }
 
         const nomor_so = document.getElementById('so_number').value.trim();
-        if (!validateSONumber10Digit(nomor_so, true)) return;
+        if (!nomor_so) {
+            alert('Nomor SO wajib diisi.');
+            return;
+        }
+
+        // Nomor SO yang sama persis tidak boleh digandakan pada SO aktif.
+        // Tambahan huruf/karakter membuatnya menjadi Nomor SO yang berbeda,
+        // misalnya 1234567890 dan 1234567890-A tetap diperbolehkan.
+        const { data: duplicateSO, error: duplicateErr } = await sb
+            .from('so')
+            .select('id')
+            .eq('nomor_so', nomor_so)
+            .is('deleted_at', null)
+            .limit(1);
+
+        if (duplicateErr) {
+            alert('Gagal memeriksa Nomor SO: ' + duplicateErr.message);
+            return;
+        }
+
+        if (duplicateSO && duplicateSO.length > 0) {
+            alert(`Nomor SO "${nomor_so}" sudah digunakan. Gunakan Nomor SO yang berbeda.`);
+            return;
+        }
 
         const tanggal_so = document.getElementById('so_date').value;
         const spbuRadio = document.querySelector('input[name="so_spbu"]:checked');
@@ -3011,58 +3033,13 @@ body.app-tab-dashboard .floating-nav-addon {
         alert('SO berhasil disimpan.');
         document.getElementById('formSO').reset();
         document.querySelectorAll('input[name="so_spbu"]').forEach(r => r.checked = false);
-        validateSONumber10Digit('', false);
         setDefaultDates();
         await fetchDashboard();
     });
 
     // =========================
-    // VALIDASI NOMOR SO — TEPAT 10 DIGIT
-    // Mengikuti pola validasi Nomor LO.
-    // =========================
-    function validateSONumber10Digit(value, showWarning = true) {
-        const input = document.getElementById('so_number');
-        const warning = document.getElementById('soNumberWarning');
-        const raw = String(value ?? '').trim();
-        const digitCount = (raw.match(/\d/g) || []).length;
-        let message = '';
-        let valid = true;
-
-        if (!raw) {
-            message = 'Nomor SO wajib diisi.';
-            valid = false;
-        } else if (!/^\d+$/.test(raw)) {
-            message = 'Nomor SO hanya boleh berisi angka.';
-            valid = false;
-        } else if (digitCount < 10) {
-            message = `Nomor SO harus tepat 10 digit. Saat ini baru ${digitCount} digit.`;
-            valid = false;
-        } else if (digitCount > 10) {
-            message = `Nomor SO harus tepat 10 digit. Saat ini ${digitCount} digit.`;
-            valid = false;
-        }
-
-        if (input && warning) {
-            input.classList.toggle('so-number-invalid', !valid);
-            warning.textContent = message;
-            warning.classList.toggle('show', showWarning && !valid);
-        }
-
-        return valid;
-    }
-
-    const soNumberInput = document.getElementById('so_number');
-    if (soNumberInput) {
-        soNumberInput.addEventListener('input', () => {
-            validateSONumber10Digit(soNumberInput.value, true);
-        });
-        soNumberInput.addEventListener('blur', () => {
-            validateSONumber10Digit(soNumberInput.value, true);
-        });
-    }
-
-    // =========================
     // VALIDASI NOMOR LO — TEPAT 10 DIGIT
+    // Hanya berlaku pada INPUT LO baru; menu EDIT LO bebas format.
     // =========================
     function validateLONumber10Digit(value, showWarning = true) {
         const input = document.getElementById('lo_number');
@@ -3091,18 +3068,13 @@ body.app-tab-dashboard .floating-nav-addon {
             warning.textContent = message;
             warning.classList.toggle('show', showWarning && !valid);
         }
-
         return valid;
     }
 
     const loNumberInput = document.getElementById('lo_number');
     if (loNumberInput) {
-        loNumberInput.addEventListener('input', () => {
-            validateLONumber10Digit(loNumberInput.value, true);
-        });
-        loNumberInput.addEventListener('blur', () => {
-            validateLONumber10Digit(loNumberInput.value, true);
-        });
+        loNumberInput.addEventListener('input', () => validateLONumber10Digit(loNumberInput.value, true));
+        loNumberInput.addEventListener('blur', () => validateLONumber10Digit(loNumberInput.value, true));
     }
 
     // =========================
@@ -3585,7 +3557,7 @@ body.app-tab-dashboard .floating-nav-addon {
             `Ubah data LO ${nomorLO}. Nomor LO, Nomor SO tujuan, tanggal, dan quantity dapat diperbaiki tanpa membuat record LO baru.`,
             `
                 <label>Nomor LO</label>
-                <input id="edit_lo_nomor" value="${escapeHtml(nomorLO)}" maxlength="100">
+                <input id="edit_lo_nomor" value="${escapeHtml(nomorLO)}">
 
                 <label style="margin-top:12px">Nomor SO / Produk Tujuan</label>
                 <select id="edit_lo_so_product">
@@ -3606,19 +3578,6 @@ body.app-tab-dashboard .floating-nav-addon {
                 if (!sb) return;
 
                 const nomor_lo = document.getElementById('edit_lo_nomor').value.trim();
-                if (!/^\d{10}$/.test(nomor_lo)) {
-                    const digitCount = (nomor_lo.match(/\d/g) || []).length;
-                    if (!nomor_lo) {
-                        alert('Nomor LO wajib diisi.');
-                    } else if (!/^\d+$/.test(nomor_lo)) {
-                        alert('Nomor LO hanya boleh berisi angka.');
-                    } else if (digitCount < 10) {
-                        alert(`Nomor LO harus tepat 10 digit. Saat ini baru ${digitCount} digit.`);
-                    } else {
-                        alert(`Nomor LO harus tepat 10 digit. Saat ini ${digitCount} digit.`);
-                    }
-                    return;
-                }
                 const tanggal_lo = document.getElementById('edit_lo_tanggal').value;
                 const quantity_lo = Number(document.getElementById('edit_lo_qty').value);
                 const targetProductId = document.getElementById('edit_lo_so_product').value;
