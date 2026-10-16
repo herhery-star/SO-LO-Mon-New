@@ -1830,6 +1830,7 @@ body.app-tab-dashboard .floating-nav-addon {
                                 <option value="8">8 KL</option>
                                 <option value="16">16 KL</option>
                                 <option value="24">24 KL</option>
+                                <option value="32">32 KL</option>
                             </select>
                         </div>
 
@@ -1840,6 +1841,7 @@ body.app-tab-dashboard .floating-nav-addon {
                                 <option value="8">8 KL</option>
                                 <option value="16">16 KL</option>
                                 <option value="24">24 KL</option>
+                                <option value="32">32 KL</option>
                             </select>
                         </div>
 
@@ -1850,6 +1852,7 @@ body.app-tab-dashboard .floating-nav-addon {
                                 <option value="8">8 KL</option>
                                 <option value="16">16 KL</option>
                                 <option value="24">24 KL</option>
+                                <option value="32">32 KL</option>
                             </select>
                         </div>
 
@@ -1861,6 +1864,7 @@ body.app-tab-dashboard .floating-nav-addon {
                                 <option value="8">8 KL</option>
                                 <option value="16">16 KL</option>
                                 <option value="24">24 KL</option>
+                                <option value="32">32 KL</option>
                             </select>
                         </div>
                     </div>
@@ -3656,9 +3660,66 @@ body.app-tab-dashboard .floating-nav-addon {
     }
 
     async function openEditSO(soId, nomorSO, tanggalSO, currentSpbu) {
+        if (!ensureEditor()) return;
+        if (!sb) return;
+
+        // Ambil produk SO dan total LO aktif agar quantity bisa diedit
+        // tanpa membiarkan quantity SO lebih kecil daripada LO yang sudah tercatat.
+        const { data: soProducts, error: productsErr } = await sb
+            .from('so_products')
+            .select(`
+                id,
+                product_name,
+                quantity_so,
+                lo (
+                    quantity_lo,
+                    deleted_at
+                )
+            `)
+            .eq('so_id', soId);
+
+        if (productsErr) {
+            alert('Gagal memuat quantity produk SO: ' + productsErr.message);
+            return;
+        }
+
+        const products = (soProducts || []).map(prod => ({
+            ...prod,
+            totalLO: (prod.lo || [])
+                .filter(lo => !lo.deleted_at)
+                .reduce((sum, lo) => sum + Number(lo.quantity_lo || 0), 0)
+        }));
+
+        const quantityOptions = productName => {
+            const isDexlite = String(productName || '').trim().toLowerCase() === 'dexlite';
+            return isDexlite ? [4, 8, 16, 24, 32] : [8, 16, 24, 32];
+        };
+
+        const productQuantityFields = products.length
+            ? products.map((prod, index) => {
+                const allowed = quantityOptions(prod.product_name);
+                const current = Number(prod.quantity_so);
+                // Pertahankan nilai lama yang tidak termasuk pilihan standar agar
+                // data historis tidak berubah hanya karena modal dibuka.
+                if (Number.isFinite(current) && !allowed.includes(current)) allowed.unshift(current);
+                const options = allowed.map(qty => `
+                    <option value="${qty}" ${qty === current ? 'selected' : ''}>${qty} KL</option>
+                `).join('');
+                return `
+                    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(105px,130px);gap:10px;align-items:center;margin-top:10px;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc">
+                        <div>
+                            <label style="margin:0">${escapeHtml(prod.product_name || 'Produk')}</label>
+                            <small style="margin-top:4px">LO tercatat: <strong>${prod.totalLO} KL</strong></small>
+                        </div>
+                        <select id="edit_so_qty_${index}" data-so-product-id="${escapeHtml(prod.id)}" data-product-name="${escapeHtml(prod.product_name || '')}" data-total-lo="${prod.totalLO}">${options}</select>
+                    </div>
+                `;
+            }).join('')
+            : '<small>SO ini tidak memiliki detail produk yang dapat diedit.</small>';
+
         openEditModal(
             'Edit Sales Order',
-            `Ubah informasi dasar SO ${nomorSO}. Quantity produk dikelola terpisah agar validasi terhadap LO tetap aman.`,
+            `Ubah informasi SO ${nomorSO} dan quantity produk. Quantity baru tidak boleh lebih kecil daripada total LO aktif yang sudah tercatat.`,
             `
                 <label>Nomor SO</label>
                 <input id="edit_so_nomor" value="${escapeHtml(nomorSO)}" maxlength="100">
@@ -3669,26 +3730,101 @@ body.app-tab-dashboard .floating-nav-addon {
                     <option value="SPBU-74.906.16" ${currentSpbu==='SPBU-74.906.16'?'selected':''}>SPBU-74.906.16</option>
                     <option value="SPBU-74.906.07" ${currentSpbu==='SPBU-74.906.07'?'selected':''}>SPBU-74.906.07</option>
                 </select>
+                <div style="margin-top:18px;padding-top:12px;border-top:2px solid #e2e8f0">
+                    <strong style="display:block;font-size:1rem">Quantity Produk (KL)</strong>
+                    <small>Periksa jumlah LO sebelum menurunkan quantity SO.</small>
+                    ${productQuantityFields}
+                </div>
             `,
             async () => {
                 if (!sb) return;
                 const nomor_so = document.getElementById('edit_so_nomor').value.trim();
                 const tanggal_so = document.getElementById('edit_so_tanggal').value;
                 const spbu = document.getElementById('edit_so_spbu').value;
-                if (!nomor_so || !tanggal_so || !spbu) { alert('Semua data wajib diisi.'); return; }
+                if (!nomor_so || !tanggal_so || !spbu) {
+                    alert('Nomor SO, tanggal SO, dan SPBU wajib diisi.');
+                    return;
+                }
+
+                // Baca ulang data langsung dari Supabase untuk validasi terbaru.
+                const { data: latestProducts, error: latestErr } = await sb
+                    .from('so_products')
+                    .select(`
+                        id,
+                        product_name,
+                        quantity_so,
+                        lo (
+                            quantity_lo,
+                            deleted_at
+                        )
+                    `)
+                    .eq('so_id', soId);
+
+                if (latestErr) {
+                    alert('Gagal memvalidasi quantity terbaru: ' + latestErr.message);
+                    return;
+                }
+
+                const updates = [];
+                for (let index = 0; index < products.length; index++) {
+                    const original = products[index];
+                    const select = document.getElementById(`edit_so_qty_${index}`);
+                    if (!select) continue;
+                    const quantity_so = Number(select.value);
+                    const latest = (latestProducts || []).find(item => item.id === original.id);
+                    if (!latest) {
+                        alert(`Produk ${original.product_name} tidak ditemukan lagi. Muat ulang dashboard lalu coba kembali.`);
+                        return;
+                    }
+
+                    const totalLO = (latest.lo || [])
+                        .filter(lo => !lo.deleted_at)
+                        .reduce((sum, lo) => sum + Number(lo.quantity_lo || 0), 0);
+                    const allowed = quantityOptions(latest.product_name);
+                    const currentLatestQty = Number(latest.quantity_so);
+                    if (Number.isFinite(currentLatestQty) && !allowed.includes(currentLatestQty)) allowed.unshift(currentLatestQty);
+
+                    if (!Number.isFinite(quantity_so) || !allowed.includes(quantity_so)) {
+                        alert(`Quantity untuk ${latest.product_name} tidak valid.`);
+                        return;
+                    }
+                    if (quantity_so < totalLO) {
+                        alert(`Perubahan ditolak untuk ${latest.product_name}: quantity SO baru ${quantity_so} KL lebih kecil daripada total LO aktif ${totalLO} KL.`);
+                        return;
+                    }
+                    updates.push({ id: latest.id, product_name: latest.product_name, quantity_so, oldQuantity: Number(latest.quantity_so) });
+                }
+
+                // Simpan quantity produk ke tabel so_products yang sudah ada.
+                for (const item of updates) {
+                    if (item.quantity_so === item.oldQuantity) continue;
+                    const { error: qtyErr } = await sb
+                        .from('so_products')
+                        .update({ quantity_so: item.quantity_so })
+                        .eq('id', item.id)
+                        .eq('so_id', soId);
+                    if (qtyErr) {
+                        alert(`Gagal menyimpan quantity ${item.product_name}: ${qtyErr.message}. Periksa dashboard sebelum mengulangi penyimpanan.`);
+                        await fetchDashboard();
+                        return;
+                    }
+                }
 
                 const { error } = await sb
                     .from('so')
                     .update({ nomor_so, tanggal_so, spbu, updated_at: new Date().toISOString() })
                     .eq('id', soId);
 
-                if (error) { alert('Gagal menyimpan perubahan SO: ' + error.message); return; }
+                if (error) {
+                    alert('Quantity produk mungkin sudah tersimpan, tetapi informasi SO gagal diperbarui: ' + error.message);
+                    await fetchDashboard();
+                    return;
+                }
                 closeEditModal();
                 await fetchDashboard();
             }
         );
     }
-
 
     // =========================
     // HELPERS
