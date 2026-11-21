@@ -1645,6 +1645,20 @@ body.app-tab-dashboard .floating-nav-addon {
 }
 
 
+/* Peringatan format Nomor SO: informatif dan tidak memblokir input */
+.so-number-warning {
+    display: none;
+    margin-top: 5px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #b45309 !important;
+}
+.so-number-warning.show { display: block; }
+#so_number.so-number-invalid {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.12);
+}
+
 /* Validasi Nomor LO: harus tepat 10 digit */
 .lo-number-warning {
     display: none;
@@ -1802,7 +1816,8 @@ body.app-tab-dashboard .floating-nav-addon {
             <form id="formSO">
                 <div class="form-group">
                     <label for="so_number">Nomor SO</label>
-                    <input type="text" id="so_number" required placeholder="Masukkan Nomor SO" autocomplete="off">
+                    <input type="text" id="so_number" required placeholder="Masukkan Nomor SO" autocomplete="off" aria-describedby="soNumberWarning">
+                    <small id="soNumberWarning" class="so-number-warning" role="status" aria-live="polite"></small>
                 </div>
 
                 <div class="form-group">
@@ -2097,6 +2112,81 @@ body.app-tab-dashboard .floating-nav-addon {
     }
 
     setDefaultDates();
+
+    // =========================
+    // KONFIRMASI TANGGAL INPUT SO & LO
+    // Perubahan tanggal dikonfirmasi; jika dibatalkan, tanggal sebelumnya dipulihkan.
+    // =========================
+    function formatTanggalKonfirmasi(value) {
+        if (!value) return '(belum dipilih)';
+        const date = new Date(`${value}T00:00:00`);
+        return date.toLocaleDateString('id-ID', {
+            weekday: 'long',
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+    }
+
+    function pasangKonfirmasiTanggal(inputId, label) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        input.dataset.confirmedDate = input.value || '';
+
+        input.addEventListener('change', () => {
+            const tanggalBaru = input.value || '';
+            if (!tanggalBaru) return;
+
+            const sesuai = window.confirm(
+                `Pastikan tanggal ${label} sudah benar.\\n\\n` +
+                `Tanggal yang dipilih: ${formatTanggalKonfirmasi(tanggalBaru)}\\n\\n` +
+                `Apakah tanggal ini sudah sesuai?`
+            );
+
+            if (sesuai) {
+                input.dataset.confirmedDate = tanggalBaru;
+            } else {
+                input.value = input.dataset.confirmedDate || '';
+            }
+        });
+    }
+
+    pasangKonfirmasiTanggal('so_date', 'SO');
+    pasangKonfirmasiTanggal('lo_date', 'LO');
+
+    // =========================
+    // PERINGATAN FORMAT NOMOR SO — TIDAK MEMBLOKIR INPUT
+    // Kriteria: seluruh karakter angka dan tepat 10 digit.
+    // Ketidaksesuaian hanya menampilkan peringatan; alur lama tetap berjalan.
+    // =========================
+    function periksaFormatNomorSO(value, showWarning = true) {
+        const input = document.getElementById('so_number');
+        const warning = document.getElementById('soNumberWarning');
+        const raw = String(value ?? '').trim();
+        let message = '';
+
+        if (raw && !/^\\d+$/.test(raw)) {
+            message = 'Peringatan: Nomor SO sebaiknya hanya berisi angka.';
+        } else if (raw && raw.length !== 10) {
+            message = `Peringatan: Nomor SO sebaiknya tepat 10 digit. Saat ini ${raw.length} digit.`;
+        }
+
+        if (input && warning) {
+            input.classList.toggle('so-number-invalid', Boolean(message));
+            warning.textContent = message;
+            warning.classList.toggle('show', showWarning && Boolean(message));
+        }
+
+        // Selalu true: pemeriksaan ini tidak pernah menghentikan proses input/simpan.
+        return true;
+    }
+
+    const soNumberInput = document.getElementById('so_number');
+    if (soNumberInput) {
+        soNumberInput.addEventListener('input', () => periksaFormatNomorSO(soNumberInput.value, true));
+        soNumberInput.addEventListener('blur', () => periksaFormatNomorSO(soNumberInput.value, true));
+    }
 
 
     // =========================
